@@ -1,0 +1,171 @@
+.card-container {
+  position: relative;
+  margin: 1rem;
+}
+
+.flipped-container:active {
+  transform: rotateY(180deg);
+}
+
+.flipped-container {
+  position: relative;
+  min-width: 19rem;
+  max-width: 19rem;
+  min-height: 35rem;
+  max-height: 35rem;
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+  border: none;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease-out;
+}
+
+.front {
+  background: rgb(255, 164, 88);
+  background: linear-gradient(
+    0deg,
+    rgba(255, 164, 88, 1) 15%,
+    rgba(255, 241, 153, 1) 86%
+  );
+}
+
+.front:hover {
+  box-shadow: 0px 0px 7.5px 4px rgb(255, 201, 157);
+}
+
+.back {
+  color: white;
+  background: rgb(2, 0, 36);
+  background: linear-gradient(
+    0deg,
+    rgba(2, 0, 36, 1) 15%,
+    rgba(1, 148, 189, 1) 86%
+  );
+}
+.back:hover {
+  box-shadow: 0px 0px 7.5px 4px rgb(2, 0, 36);
+}
+
+.city-name {
+  white-space: normal;
+  overflow: hidden;
+  word-break: break-all;
+  margin-right: 2rem;
+}
+
+.city-name p {
+  font-size: 3rem;
+  margin: 0rem;
+  margin-top: 0.5rem;
+  margin-left: 1.5rem;
+  text-transform: capitalize;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.long-name p {
+  font-size: 2.5rem;
+}
+
+.info-container {
+  height: 32rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.info-item {
+  font-size: 2rem;
+  margin: 0rem;
+  margin-left: 1.5rem;
+  font-weight: 600;
+}
+.info-item-back {
+  font-size: 1.5rem;
+  margin: 0rem;
+  margin-left: 1.5rem;
+  margin-right: 2.75rem;
+  font-weight: 600;
+  white-space: normal;
+}
+
+.img-container {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+}
+
+.img {
+  width: 60%;
+  height: 60%;
+}
+
+.description {
+  font-size: 2rem;
+  margin: 0rem;
+  margin-left: 1.5rem;
+  margin-right: 3rem;
+  font-weight: 600;
+  white-space: normal;
+  min-height: 8rem;
+  text-transform: capitalize;
+}
+
+.first {
+  margin-top: 0.35rem;
+}
+
+.last {
+  margin-bottom: 2rem;
+}
+
+.btn-delete {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 8.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin: 0;
+}
+
+.btn-delete:hover {
+  color: red;
+  border: 0.1rem solid white;
+  border-radius: 10px;
+  bottom: 0.65rem;
+  right: 8.4rem;
+}
+
+.btn-div {
+  margin: 0;
+  padding: 0;
+  height: 1em;
+  width: 1em;
+}
+
+.help-text-container {
+  position: absolute;
+  rotate: -90deg;
+  top: 50%;
+  right: -9.5rem;
+}
+
+.help-text-front {
+  font-weight: 400;
+  font-size: 1.5rem;
+  margin: 0;
+  letter-spacing: 1.5px;
+}
+
+.help-text-back {
+  font-weight: 300;
+  margin: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+}
