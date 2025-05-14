@@ -1,5 +1,4 @@
 import React from "react";
-
 const weatherCodeMap = {
   0: { label: "Clear sky", icon: "☀️" },
   1: { label: "Mainly clear", icon: "🌤️" },
@@ -30,7 +29,6 @@ const weatherCodeMap = {
   96: { label: "Thunderstorm with slight hail", icon: "⛈️" },
   99: { label: "Thunderstorm with heavy hail", icon: "⛈️" },
 };
-
 const WeatherCard = ({
   day,
   weatherCode,
@@ -41,19 +39,17 @@ const WeatherCard = ({
   precipChance
 }) => {
   const weather = weatherCodeMap[weatherCode] || { label: "Unknown", icon: "?" };
-
   return (
     <div className="rounded-lg shadow-lg bg-white p-4 space-y-2 text-center w-[250px]">
       <div className="text-lg font-semibold">{day}</div>
       <div className="text-4xl">{weather.icon}</div>
       <div className="text-sm text-gray-600">{weather.label}</div>
-      <div>🌡️ Max: {maxTemp}°C</div>
-      <div>🌡️ Min: {minTemp}°C</div>
-      <div>💨 Wind: {windSpeed} km/h</div>
-      <div>☔ Chance: {precipChance}%</div>
-      <div>🌧️ Rain: {precipSum} mm</div>
+      <div>:thermometer: Max: {maxTemp}°C</div>
+      <div>:thermometer: Min: {minTemp}°C</div>
+      <div>:dash: Wind: {windSpeed} km/h</div>
+      <div>:umbrella_with_raindrops: Chance: {precipChance}%</div>
+      <div>��️ Rain: {precipSum} mm</div>
     </div>
   );
 };
-
 export default WeatherCard;
