@@ -27,11 +27,11 @@ export default function Home() {
   }, [selectedCity]);
   const formattedDays = days.time?.map((date, index) => ({
     day: date,
-    maxTemp: days.temperature_2m_max[index],
-    minTemp: days.temperature_2m_min[index],
-    windSpeed: days.wind_speed_10m_max[index],
-    precipSum: days.precipitation_sum[index],
-    precipChance: days.precipitation_probability_max[index],
+    maxTemp: Math.round(days.temperature_2m_max[index]),
+    minTemp: Math.round(days.temperature_2m_min[index]),
+    windSpeed: Math.round(days.wind_speed_10m_max[index]),
+    precipSum: Math.round(days.precipitation_sum[index]),
+    precipChance: Math.round(days.precipitation_probability_max[index]),
     weatherCode: days.weather_code[index]
   }));
   return (
