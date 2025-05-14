@@ -174,9 +174,11 @@ process.on('unhandledRejection', (error) => {
   logger.error('Unhandled Rejection:', error);
 });
 
-// Start server
-app.listen(port, () => {
-  logger.info(`App listening on port ${port}`);
-});
+// Start server only if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    logger.info(`App listening on port ${port}`);
+  });
+}
 
-export default { app };
+export { app };
