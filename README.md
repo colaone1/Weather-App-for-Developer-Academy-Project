@@ -152,3 +152,27 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 
 ## License
 [MIT](LICENSE)
+
+## 🌐 Environment Variables
+
+This project requires the following environment variables to be set (see `.env.example`):
+
+```
+APPID=your_openweathermap_api_key
+MAP_ENDPOINT=http://api.openweathermap.org/data/2.5
+TARGET_CITY=Helsinki,fi
+PORT=8000
+REDIS_URL=redis://localhost:6379
+```
+
+- Copy `.env.example` to `.env` and fill in your values.
+- For deployment on Vercel, add these variables in your project settings under Environment Variables.
+
+## 🚀 Deployment
+
+This app is best deployed on [Vercel](https://vercel.com/):
+1. Import your GitHub repo into Vercel.
+2. Add the environment variables above in the Vercel dashboard.
+3. Deploy and get your public URL.
+
+For more details, see the full documentation below.
