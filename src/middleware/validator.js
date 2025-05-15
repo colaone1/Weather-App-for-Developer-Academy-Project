@@ -1,18 +1,44 @@
 import logger from './logger.js';
 
+const MAX_BODY_SIZE = 1024 * 1024; // 1MB
+const MAX_QUERY_LENGTH = 1000; // 1000 characters
+
+// Input sanitization functions
+const sanitizeString = (str) => {
+  if (typeof str !== 'string') return '';
+  return str.trim().replace(/[<>]/g, '');
+};
+
+const sanitizeNumber = (num) => {
+  if (typeof num === 'number') return num;
+  const parsed = parseFloat(num);
+  return isNaN(parsed) ? null : parsed;
+};
+
+// Validation functions
 const validateCity = (city) => {
-  if (!city || typeof city !== 'string') return false;
-  // Allow letters, spaces, hyphens, and apostrophes
-  return /^[a-zA-Z\s\-']+$/.test(city);
+  const sanitized = sanitizeString(city);
+  return /^[a-zA-Z\s\-']+$/.test(sanitized) && sanitized.length <= 100;
 };
 
 const validateCoordinates = (lon, lat) => {
-  if (!lon || !lat) return false;
-  const lonNum = parseFloat(lon);
-  const latNum = parseFloat(lat);
-  return !isNaN(lonNum) && !isNaN(latNum) &&
-         lonNum >= -180 && lonNum <= 180 &&
-         latNum >= -90 && latNum <= 90;
+  const sanitizedLon = sanitizeNumber(lon);
+  const sanitizedLat = sanitizeNumber(lat);
+  
+  return (
+    sanitizedLon !== null &&
+    sanitizedLat !== null &&
+    sanitizedLon >= -180 &&
+    sanitizedLon <= 180 &&
+    sanitizedLat >= -90 &&
+    sanitizedLat <= 90
+  );
+};
+
+const validateQueryLength = (query) => {
+  return Object.values(query).every(value => 
+    typeof value === 'string' && value.length <= MAX_QUERY_LENGTH
+  );
 };
 
 const validator = async (ctx, next) => {
@@ -23,6 +49,32 @@ const validator = async (ctx, next) => {
   ctx.set('X-Request-ID', requestId);
   
   try {
+    // Validate request body size
+    if (ctx.request.length > MAX_BODY_SIZE) {
+      ctx.status = 413;
+      ctx.body = {
+        error: {
+          message: 'Request entity too large',
+          requestId,
+          details: `Maximum request size is ${MAX_BODY_SIZE / 1024 / 1024}MB`
+        }
+      };
+      return;
+    }
+    
+    // Validate query parameters length
+    if (!validateQueryLength(ctx.query)) {
+      ctx.status = 400;
+      ctx.body = {
+        error: {
+          message: 'Query parameters too long',
+          requestId,
+          details: `Maximum query parameter length is ${MAX_QUERY_LENGTH} characters`
+        }
+      };
+      return;
+    }
+    
     // Validate based on route
     if (ctx.path === '/api/weatherbycity') {
       const { city } = ctx.query;
@@ -37,17 +89,22 @@ const validator = async (ctx, next) => {
         };
         return;
       }
-      if (!validateCity(city)) {
+      
+      const sanitizedCity = sanitizeString(city);
+      if (!validateCity(sanitizedCity)) {
         ctx.status = 400;
         ctx.body = {
           error: {
             message: 'Invalid city name',
             requestId,
-            details: 'City name should contain only letters, spaces, hyphens, and apostrophes'
+            details: 'City name should contain only letters, spaces, hyphens, and apostrophes (max 100 characters)'
           }
         };
         return;
       }
+      
+      // Update query with sanitized value
+      ctx.query.city = sanitizedCity;
     }
     
     if (ctx.path === '/api/weatherbycoordinates' || ctx.path === '/api/forecastbycoordinates') {
@@ -63,7 +120,11 @@ const validator = async (ctx, next) => {
         };
         return;
       }
-      if (!validateCoordinates(lon, lat)) {
+      
+      const sanitizedLon = sanitizeNumber(lon);
+      const sanitizedLat = sanitizeNumber(lat);
+      
+      if (!validateCoordinates(sanitizedLon, sanitizedLat)) {
         ctx.status = 400;
         ctx.body = {
           error: {
@@ -74,6 +135,10 @@ const validator = async (ctx, next) => {
         };
         return;
       }
+      
+      // Update query with sanitized values
+      ctx.query.lon = sanitizedLon;
+      ctx.query.lat = sanitizedLat;
     }
     
     // Log request details
@@ -83,7 +148,8 @@ const validator = async (ctx, next) => {
       method: ctx.method,
       path: ctx.path,
       query: ctx.query,
-      ip: ctx.ip
+      ip: ctx.ip,
+      userAgent: ctx.get('User-Agent')
     });
     
     await next();
