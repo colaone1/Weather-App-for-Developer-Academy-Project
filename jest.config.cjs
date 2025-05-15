@@ -8,20 +8,32 @@ module.exports = {
       '<rootDir>/tests/__mocks__/fileMock.js'
   },
   transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }]
+    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { 
+      presets: [
+        '@babel/preset-env',
+        '@babel/preset-react',
+        '@babel/preset-typescript'
+      ]
+    }]
   },
   testMatch: [
     '<rootDir>/tests/**/*.test.js',
     '<rootDir>/tests/**/*.test.jsx',
     '<rootDir>/tests/**/*.test.ts',
-    '<rootDir>/tests/**/*.test.tsx'
+    '<rootDir>/tests/**/*.test.tsx',
+    '<rootDir>/src/**/*.test.js',
+    '<rootDir>/src/**/*.test.jsx',
+    '<rootDir>/src/**/*.test.ts',
+    '<rootDir>/src/**/*.test.tsx'
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
     '!src/**/*.stories.{js,jsx,ts,tsx}',
     '!src/**/*.test.{js,jsx,ts,tsx}',
-    '!src/**/index.{js,jsx,ts,tsx}'
+    '!src/**/index.{js,jsx,ts,tsx}',
+    '!src/**/*.config.{js,ts}',
+    '!src/**/types.{ts,tsx}'
   ],
   coverageThreshold: {
     global: {
@@ -45,7 +57,28 @@ module.exports = {
       outputDirectory: 'test-results',
       outputName: 'junit.xml',
       classNameTemplate: '{classname}',
-      titleTemplate: '{title}'
+      titleTemplate: '{title}',
+      ancestorSeparator: ' › ',
+      addFileAttribute: true
+    }],
+    ['jest-html-reporter', {
+      pageTitle: 'Test Report',
+      outputPath: './test-results/test-report.html',
+      includeFailureMsg: true,
+      includeSuiteFailure: true
     }]
+  ],
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.json',
+      isolatedModules: true
+    }
+  },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  coverageReporters: ['text', 'lcov', 'clover', 'html'],
+  watchPlugins: [
+    'jest-watch-typeahead/filename',
+    'jest-watch-typeahead/testname'
   ]
 }; 

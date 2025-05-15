@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { Router } from 'react-router-dom';
+import { Router, BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import rootReducer from '../../src/store/rootReducer';
@@ -39,7 +39,7 @@ export const mockIntersectionObserver = () => {
   mockIntersectionObserver.mockReturnValue({
     observe: () => null,
     unobserve: () => null,
-    disconnect: () => null,
+    disconnect: () => null
   });
   window.IntersectionObserver = mockIntersectionObserver;
 };
@@ -50,31 +50,26 @@ export const mockResizeObserver = () => {
   mockResizeObserver.mockReturnValue({
     observe: () => null,
     unobserve: () => null,
-    disconnect: () => null,
+    disconnect: () => null
   });
   window.ResizeObserver = mockResizeObserver;
 };
 
-// Mock matchMedia (keep only this robust implementation)
-export const mockMatchMedia = (matches = false) => {
-  const mediaQueryList = {
-    matches,
-    media: '',
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn()
-  };
+// Mock MatchMedia
+export const mockMatchMedia = () => {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: jest.fn().mockImplementation(query => ({
-      ...mediaQueryList,
-      media: query
+    value: jest.fn((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn()
     }))
   });
-  return mediaQueryList;
 };
 
 // Mock localStorage (keep only this robust implementation)
@@ -95,40 +90,43 @@ export const mockLocalStorage = () => {
   return localStorage;
 };
 
-// Mock fetch with error handling
-export const mockFetch = (response, options = {}) => {
-  const { error = false, status = 200, delay = 0 } = options;
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      if (error) {
-        global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
-      } else {
-        global.fetch = jest.fn().mockResolvedValue({
-          ok: status >= 200 && status < 300,
-          status,
-          json: () => Promise.resolve(response),
-        });
-      }
-      resolve();
-    }, delay);
-  });
+// Mock fetch with response
+export const mockFetch = (response) => {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(response)
+    })
+  );
 };
 
-// Mock console methods
-export const mockConsole = () => {
-  const originalConsole = { ...console };
-  const mockConsole = {
-    log: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-  };
-  global.console = mockConsole;
-  return { originalConsole, mockConsole };
+// Mock fetch with error
+export const mockFetchError = (error) => {
+  global.fetch = jest.fn(() =>
+    Promise.reject(error)
+  );
 };
 
-// Wait utility
+// Wait for a specific time
 export const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Mock sessionStorage
+export const mockSessionStorage = () => {
+  const store = new Map();
+  const sessionStorage = {
+    getItem: jest.fn((key) => store.get(key) || null),
+    setItem: jest.fn((key, value) => store.set(key, value)),
+    removeItem: jest.fn((key) => store.delete(key)),
+    clear: jest.fn(() => store.clear()),
+    key: jest.fn((index) => Array.from(store.keys())[index]),
+    get length() { return store.size; }
+  };
+  Object.defineProperty(window, 'sessionStorage', {
+    value: sessionStorage,
+    writable: true
+  });
+  return sessionStorage;
+};
 
 // Mock geolocation (keep only this robust implementation)
 export const mockGeolocation = (coords = { latitude: 51.5074, longitude: -0.1278 }) => {
@@ -144,20 +142,72 @@ export const mockGeolocation = (coords = { latitude: 51.5074, longitude: -0.1278
   return mockGeolocation;
 };
 
-// Mock performance
+// Mock IntersectionObserver entries
+export const mockIntersectionObserverEntries = (entries) => {
+  const mockIntersectionObserver = jest.fn();
+  mockIntersectionObserver.mockReturnValue({
+    observe: () => null,
+    unobserve: () => null,
+    disconnect: () => null,
+    takeRecords: () => entries,
+  });
+  window.IntersectionObserver = mockIntersectionObserver;
+};
+
+// Mock ResizeObserver entries
+export const mockResizeObserverEntries = (entries) => {
+  const mockResizeObserver = jest.fn();
+  mockResizeObserver.mockReturnValue({
+    observe: () => null,
+    unobserve: () => null,
+    disconnect: () => null,
+    takeRecords: () => entries,
+  });
+  window.ResizeObserver = mockResizeObserver;
+};
+
+// Mock window.location
+export const mockWindowLocation = (location) => {
+  delete window.location;
+  window.location = {
+    ...location,
+    assign: jest.fn(),
+    replace: jest.fn(),
+    reload: jest.fn(),
+  };
+};
+
+// Mock window.history
+export const mockWindowHistory = () => {
+  const history = {
+    pushState: jest.fn(),
+    replaceState: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    go: jest.fn(),
+  };
+  Object.defineProperty(window, 'history', {
+    value: history,
+    writable: true,
+  });
+};
+
+// Mock window.performance
 export const mockPerformance = () => {
   const performance = {
-    now: jest.fn().mockReturnValue(0),
+    now: jest.fn(() => Date.now()),
     mark: jest.fn(),
     measure: jest.fn(),
     clearMarks: jest.fn(),
     clearMeasures: jest.fn(),
+    getEntriesByType: jest.fn(() => []),
+    getEntriesByName: jest.fn(() => []),
+    getEntries: jest.fn(() => []),
   };
-  Object.defineProperty(global, 'performance', {
+  Object.defineProperty(window, 'performance', {
     value: performance,
     writable: true,
   });
-  return performance;
 };
 
 // Mock Error Boundary component
@@ -169,6 +219,7 @@ export class MockErrorBoundary extends React.Component {
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   componentDidCatch(_error, _errorInfo) {
     // console.error('Error caught by boundary:', _error, _errorInfo);
   }
@@ -248,57 +299,6 @@ export const mockPerformanceMarks = () => {
   });
   
   return performance;
-};
-
-// Mock sessionStorage
-export const mockSessionStorage = () => {
-  const store = new Map();
-  
-  const sessionStorage = {
-    getItem: jest.fn((key) => store.get(key) || null),
-    setItem: jest.fn((key, value) => store.set(key, value)),
-    removeItem: jest.fn((key) => store.delete(key)),
-    clear: jest.fn(() => store.clear()),
-    key: jest.fn((index) => Array.from(store.keys())[index]),
-    get length() { return store.size; }
-  };
-  
-  Object.defineProperty(window, 'sessionStorage', {
-    value: sessionStorage,
-    writable: true
-  });
-  
-  return sessionStorage;
-};
-
-// Clean up after each test
-export const cleanup = () => {
-  jest.clearAllMocks();
-  localStorage.clear();
-  sessionStorage.clear();
-  performance.clearMarks();
-  performance.clearMeasures();
-  performance.getEntriesByType.mockClear();
-  performance.getEntriesByName.mockClear();
-  performance.getEntries.mockClear();
-  performance.now.mockClear();
-  // console.error.mockClear();
-  // console.warn.mockClear();
-  // console.log.mockClear();
-  // console.info.mockClear();
-  // console.debug.mockClear();
-  // console.trace.mockClear();
-  // console.group.mockClear();
-  // console.groupEnd.mockClear();
-  // console.groupCollapsed.mockClear();
-  // console.time.mockClear();
-  // console.timeEnd.mockClear();
-  // console.timeLog.mockClear();
-  // console.assert.mockClear();
-  global.requestIdleCallback.mockClear();
-  global.cancelIdleCallback.mockClear();
-  global.requestAnimationFrame.mockClear();
-  global.cancelAnimationFrame.mockClear();
 };
 
 // Mock WebSocket
@@ -507,4 +507,34 @@ export const mockFullscreen = () => {
     configurable: true
   });
   return mockFullscreen;
+};
+
+// Clean up after each test
+export const cleanup = () => {
+  jest.clearAllMocks();
+  localStorage.clear();
+  sessionStorage.clear();
+  performance.clearMarks();
+  performance.clearMeasures();
+  performance.getEntriesByType.mockClear();
+  performance.getEntriesByName.mockClear();
+  performance.getEntries.mockClear();
+  performance.now.mockClear();
+  // console.error.mockClear();
+  // console.warn.mockClear();
+  // console.log.mockClear();
+  // console.info.mockClear();
+  // console.debug.mockClear();
+  // console.trace.mockClear();
+  // console.group.mockClear();
+  // console.groupEnd.mockClear();
+  // console.groupCollapsed.mockClear();
+  // console.time.mockClear();
+  // console.timeEnd.mockClear();
+  // console.timeLog.mockClear();
+  // console.assert.mockClear();
+  global.requestIdleCallback.mockClear();
+  global.cancelIdleCallback.mockClear();
+  global.requestAnimationFrame.mockClear();
+  global.cancelAnimationFrame.mockClear();
 }; 
