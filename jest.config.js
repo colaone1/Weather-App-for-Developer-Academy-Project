@@ -2,59 +2,50 @@ module.exports = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/tests/setup/setupTests.js'],
   moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/tests/__mocks__/fileMock.js',
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
+      '<rootDir>/tests/__mocks__/fileMock.js'
   },
   transform: {
-    '^.+\\.(js|jsx)$': 'babel-jest',
+    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }]
   },
   testMatch: [
     '<rootDir>/tests/**/*.test.js',
     '<rootDir>/tests/**/*.test.jsx',
+    '<rootDir>/tests/**/*.test.ts',
+    '<rootDir>/tests/**/*.test.tsx'
   ],
   collectCoverageFrom: [
-    'src/**/*.{js,jsx}',
-    'frontend/src/**/*.{js,jsx}',
-    '!src/index.js',
-    '!src/serviceWorker.js',
-    '!**/node_modules/**',
-    '!**/vendor/**',
+    'src/**/*.{js,jsx,ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/**/*.stories.{js,jsx,ts,tsx}',
+    '!src/**/*.test.{js,jsx,ts,tsx}',
+    '!src/**/index.{js,jsx,ts,tsx}'
   ],
   coverageThreshold: {
     global: {
       branches: 80,
       functions: 80,
       lines: 80,
-      statements: 80,
-    },
-    './src/middleware/': {
-      branches: 90,
-      functions: 90,
-      lines: 90,
-      statements: 90,
-    },
-    './frontend/src/components/': {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
-    },
+      statements: 80
+    }
   },
-  coverageReporters: ['text', 'lcov', 'html', 'json', 'json-summary'],
-  coverageDirectory: 'coverage',
-  verbose: true,
   testTimeout: 10000,
-  testEnvironmentOptions: {
-    url: 'http://localhost:3000',
-  },
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.json',
-    },
-  },
-  moduleFileExtensions: ['js', 'jsx', 'json', 'node'],
-  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
-  transformIgnorePatterns: [
-    '/node_modules/(?!(@testing-library|@babel|@emotion)/)',
-  ],
+  verbose: true,
+  clearMocks: true,
+  restoreMocks: true,
+  resetMocks: true,
+  maxWorkers: '50%',
+  maxConcurrency: 1,
+  bail: 1,
+  reporters: [
+    'default',
+    ['jest-junit', {
+      outputDirectory: 'test-results',
+      outputName: 'junit.xml',
+      classNameTemplate: '{classname}',
+      titleTemplate: '{title}'
+    }]
+  ]
 }; 

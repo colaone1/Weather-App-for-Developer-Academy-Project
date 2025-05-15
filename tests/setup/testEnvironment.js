@@ -13,6 +13,22 @@ global.fetch = jest.fn().mockImplementation(() =>
   })
 );
 
+// Mock requestIdleCallback
+global.requestIdleCallback = jest.fn().mockImplementation(callback => {
+  setTimeout(() => callback({ didTimeout: false, timeRemaining: () => 15 }), 0);
+  return 1;
+});
+
+global.cancelIdleCallback = jest.fn();
+
+// Mock requestAnimationFrame
+global.requestAnimationFrame = jest.fn().mockImplementation(callback => {
+  setTimeout(callback, 0);
+  return 1;
+});
+
+global.cancelAnimationFrame = jest.fn();
+
 // Mock localStorage with enhanced functionality
 const localStorageMock = {
   getItem: jest.fn(),
@@ -189,6 +205,10 @@ afterEach(() => {
   consoleMock.timeEnd.mockClear();
   consoleMock.timeLog.mockClear();
   consoleMock.assert.mockClear();
+  global.requestIdleCallback.mockClear();
+  global.cancelIdleCallback.mockClear();
+  global.requestAnimationFrame.mockClear();
+  global.cancelAnimationFrame.mockClear();
 });
 
 // Set test timeout
