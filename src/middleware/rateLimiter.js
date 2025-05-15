@@ -4,11 +4,30 @@ import Redis from 'ioredis';
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const MAX_REQUESTS = 100; // 100 requests per window
 
-// Initialize Redis client
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+// Initialize Redis client with retry strategy
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+  retryStrategy: (times) => {
+    const delay = Math.min(times * 50, 2000);
+    return delay;
+  },
+  maxRetriesPerRequest: 3
+});
 
 redis.on('error', (err) => {
   logger.error('Redis error:', err);
+});
+
+redis.on('connect', () => {
+  logger.info('Redis connected successfully');
+});
+
+// Cleanup Redis connection on app shutdown
+process.on('SIGTERM', () => {
+  redis.quit();
+});
+
+process.on('SIGINT', () => {
+  redis.quit();
 });
 
 const rateLimiter = async (ctx, next) => {
@@ -29,7 +48,8 @@ const rateLimiter = async (ctx, next) => {
       ctx.body = {
         error: {
           message: 'Too many requests, please try again later',
-          retryAfter: ttl
+          retryAfter: ttl,
+          requestId: ctx.state.requestId
         }
       };
       return;
