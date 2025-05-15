@@ -6,6 +6,8 @@ import errorHandler from './src/middleware/errorHandler.js';
 import logger from './src/middleware/logger.js';
 import rateLimiter from './src/middleware/rateLimiter.js';
 import security from './src/middleware/security.js';
+import validator from './src/middleware/validator.js';
+import performanceMonitor from './src/middleware/performance.js';
 
 if (!process.env.APPID) {
   logger.error('APPID environment variable is not set');
@@ -25,6 +27,8 @@ app.use(cors());
 app.use(security);
 app.use(errorHandler);
 app.use(rateLimiter);
+app.use(validator);
+app.use(performanceMonitor);
 app.use(logger);
 
 // Logging middleware
