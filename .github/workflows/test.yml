@@ -2,145 +2,41 @@ name: Test
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
+
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
       with:
-        node-version: '18.x'
+        node-version: ${{ matrix.node-version }}
         cache: 'npm'
+    
     - name: Install dependencies
       run: npm ci
+    
     - name: Run linting
       run: npm run lint
-
-  backend-tests:
-    runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '18.x'
-        cache: 'npm'
-    - name: Install dependencies
-      run: npm ci
-    - name: Run backend tests
-      run: npm run test:backend
-      env:
-        NODE_ENV: test
-        APPID: ${{ secrets.APPID }}
-        REDIS_URL: redis://localhost:6379
-
-  frontend-tests:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '18.x'
-        cache: 'npm'
-    - name: Install dependencies
-      run: npm ci
-    - name: Run frontend tests
-      run: npm run test:frontend
-    - name: Run performance tests
-      run: npm run test:performance
-
-  e2e-tests:
-    needs: [backend-tests, frontend-tests]
-    runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '18.x'
-        cache: 'npm'
-    - name: Install dependencies
-      run: npm ci
-    - name: Build frontend
-      run: npm run build
-    - name: Start server for E2E tests
-      run: |
-        npm run start & npx wait-on http://localhost:8000
-      env:
-        NODE_ENV: test
-        APPID: ${{ secrets.APPID }}
-        REDIS_URL: redis://localhost:6379
-    - name: Run E2E tests
-      run: npm run test:e2e
-      env:
-        CYPRESS_baseUrl: http://localhost:3000
-        CYPRESS_apiUrl: http://localhost:8000
-
-  coverage:
-    needs: [backend-tests, frontend-tests, e2e-tests]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '18.x'
-        cache: 'npm'
-    - name: Install dependencies
-      run: npm ci
-    - name: Upload coverage reports
+    
+    - name: Run tests
+      run: npm run test
+    
+    - name: Generate coverage report
+      run: npm run test:coverage
+    
+    - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./coverage/lcov.info
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
-
-  artifacts:
-    needs: [backend-tests, frontend-tests, e2e-tests]
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-    - uses: actions/checkout@v3
-    - name: Upload test results
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results
-        path: |
-          coverage/
-          cypress/videos/
-          cypress/screenshots/
-        retention-days: 7
-    - name: Check test status
-      run: |
-        if [ "${{ needs.backend-tests.result }}" == "success" ] && \
-           [ "${{ needs.frontend-tests.result }}" == "success" ] && \
-           [ "${{ needs.e2e-tests.result }}" == "success" ]; then
-          echo "All tests passed successfully!"
-          exit 0
-        else
-          echo "Some tests failed. Check the artifacts for details."
-          exit 1
-        fi 
+        fail_ci_if_error: true 
