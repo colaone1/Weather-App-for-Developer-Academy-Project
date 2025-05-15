@@ -7,12 +7,16 @@ import logger from './src/middleware/logger.js';
 import rateLimiter from './src/middleware/rateLimiter.js';
 import security from './src/middleware/security.js';
 
-const appId = process.env.APPID || '22313e921b28d2559ab79166c0f9b6d2';
-const mapURI =
-  process.env.MAP_ENDPOINT || 'http://api.openweathermap.org/data/2.5';
-const targetCity = process.env.TARGET_CITY || 'Helsinki,fi';
+if (!process.env.APPID) {
+  logger.error('APPID environment variable is not set');
+  process.exit(1);
+}
 
+const appId = process.env.APPID;
+const mapURI = process.env.MAP_ENDPOINT || 'http://api.openweathermap.org/data/2.5';
+const targetCity = process.env.TARGET_CITY || 'Helsinki,fi';
 const port = process.env.PORT || 8000;
+
 const router = new Router();
 const app = new Koa();
 
@@ -21,6 +25,7 @@ app.use(cors());
 app.use(security);
 app.use(errorHandler);
 app.use(rateLimiter);
+app.use(logger);
 
 // Logging middleware
 app.use(async (ctx, next) => {
