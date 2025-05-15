@@ -43,7 +43,7 @@ const WeatherCard = ({
   const weather = weatherCodeMap[weatherCode] || { label: "Unknown", icon: "?" };
 
   return (
-    <div className="rounded-lg shadow-lg bg-white p-4 space-y-2 text-center w-[250px]">
+    <div className="rounded-lg shadow-lg bg-gradient-to-b from-cyan-200/50 to-sky-500/50 p-4 space-y-2 text-center w-[250px] border border-white/30 transform transition-transform duration-300 hover:scale-105">
       <div className="text-lg font-semibold">{day}</div>
       <div className="text-4xl">{weather.icon}</div>
       <div className="text-sm text-gray-600">{weather.label}</div>
