@@ -7,7 +7,9 @@ const errorHandler = async (ctx, next) => {
     logger.error('Error occurred:', err);
 
     ctx.status = err.status || 500;
-    ctx.body = {
+    
+    // Enhanced error response
+    const errorResponse = {
       error: {
         message: err.message || 'Internal Server Error',
         status: ctx.status,
@@ -15,9 +17,25 @@ const errorHandler = async (ctx, next) => {
       }
     };
 
-    // Don't expose internal errors in production
-    if (process.env.NODE_ENV === 'production') {
-      ctx.body.error.message = 'An unexpected error occurred';
+    // Add more details in development mode
+    if (process.env.NODE_ENV !== 'production') {
+      errorResponse.error.details = {
+        name: err.name,
+        stack: err.stack,
+        code: err.code,
+        path: ctx.path,
+        method: ctx.method,
+        query: ctx.query,
+        body: ctx.request.body
+      };
+    }
+
+    ctx.body = errorResponse;
+
+    // Set appropriate headers
+    ctx.set('Content-Type', 'application/json');
+    if (err.status === 429) {
+      ctx.set('Retry-After', '60');
     }
   }
 };
