@@ -1,171 +1,134 @@
 .card-container {
-  position: relative;
-  margin: 1rem;
-}
-
-.flipped-container:active {
-  transform: rotateY(180deg);
+  perspective: 1000px;
+  width: 300px;
+  height: 400px;
+  margin: 20px;
+  cursor: pointer;
 }
 
 .flipped-container {
   position: relative;
-  min-width: 19rem;
-  max-width: 19rem;
-  min-height: 35rem;
-  max-height: 35rem;
-  display: flex;
-  flex-direction: column;
-  border-radius: 15px;
-  border: none;
-  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
   transform-style: preserve-3d;
-  transition: transform 0.5s ease-out;
 }
 
-.front {
-  background: rgb(255, 164, 88);
-  background: linear-gradient(
-    0deg,
-    rgba(255, 164, 88, 1) 15%,
-    rgba(255, 241, 153, 1) 86%
-  );
+.card-container.flipped .flipped-container {
+  transform: rotateY(180deg);
 }
 
-.front:hover {
-  box-shadow: 0px 0px 7.5px 4px rgb(255, 201, 157);
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
 }
 
-.back {
-  color: white;
-  background: rgb(2, 0, 36);
-  background: linear-gradient(
-    0deg,
-    rgba(2, 0, 36, 1) 15%,
-    rgba(1, 148, 189, 1) 86%
-  );
-}
-.back:hover {
-  box-shadow: 0px 0px 7.5px 4px rgb(2, 0, 36);
-}
-
-.city-name {
-  white-space: normal;
-  overflow: hidden;
-  word-break: break-all;
-  margin-right: 2rem;
-}
-
-.city-name p {
-  font-size: 3rem;
-  margin: 0rem;
-  margin-top: 0.5rem;
-  margin-left: 1.5rem;
-  text-transform: capitalize;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.long-name p {
-  font-size: 2.5rem;
-}
-
-.info-container {
-  height: 32rem;
+.card-back {
+  transform: rotateY(180deg);
   display: flex;
   flex-direction: column;
   justify-content: space-around;
 }
 
-.info-item {
-  font-size: 2rem;
-  margin: 0rem;
-  margin-left: 1.5rem;
-  font-weight: 600;
-}
-.info-item-back {
-  font-size: 1.5rem;
-  margin: 0rem;
-  margin-left: 1.5rem;
-  margin-right: 2.75rem;
-  font-weight: 600;
-  white-space: normal;
+.city-name {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #2c3e50;
 }
 
-.img-container {
+.weather-info {
   display: flex;
   align-items: center;
-  justify-content: start;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
-.img {
-  width: 60%;
-  height: 60%;
+.weather-icon {
+  width: 100px;
+  height: 100px;
 }
 
-.description {
-  font-size: 2rem;
-  margin: 0rem;
-  margin-left: 1.5rem;
-  margin-right: 3rem;
-  font-weight: 600;
-  white-space: normal;
-  min-height: 8rem;
+.temperature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.temp-value {
+  font-size: 36px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.feels-like {
+  font-size: 14px;
+  color: #7f8c8d;
+}
+
+.weather-description {
+  text-align: center;
+  font-size: 18px;
+  color: #34495e;
   text-transform: capitalize;
 }
 
-.first {
-  margin-top: 0.35rem;
+.info-item-back {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ecf0f1;
 }
 
-.last {
-  margin-bottom: 2rem;
+.info-label {
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.info-value {
+  color: #2c3e50;
+  font-weight: 500;
 }
 
 .btn-delete {
-  position: absolute;
-  bottom: 0.75rem;
-  right: 8.5rem;
-  background: transparent;
+  margin-top: 20px;
+  padding: 10px 20px;
   border: none;
-  font-size: 1.5rem;
+  border-radius: 5px;
+  background-color: #e74c3c;
+  color: white;
   cursor: pointer;
-  padding: 0.5rem;
-  margin: 0;
+  transition: background-color 0.3s;
 }
 
 .btn-delete:hover {
-  color: red;
-  border: 0.1rem solid white;
-  border-radius: 10px;
-  bottom: 0.65rem;
-  right: 8.4rem;
+  background-color: #c0392b;
 }
 
-.btn-div {
-  margin: 0;
-  padding: 0;
-  height: 1em;
-  width: 1em;
-}
+@media (max-width: 768px) {
+  .card-container {
+    width: 280px;
+    height: 380px;
+  }
 
-.help-text-container {
-  position: absolute;
-  rotate: -90deg;
-  top: 50%;
-  right: -9.5rem;
-}
+  .city-name {
+    font-size: 20px;
+  }
 
-.help-text-front {
-  font-weight: 400;
-  font-size: 1.5rem;
-  margin: 0;
-  letter-spacing: 1.5px;
-}
+  .temp-value {
+    font-size: 30px;
+  }
 
-.help-text-back {
-  font-weight: 300;
-  margin: 0;
-  margin-bottom: 0.5rem;
-  font-size: 1.5rem;
-  letter-spacing: 2px;
+  .weather-icon {
+    width: 80px;
+    height: 80px;
+  }
 }

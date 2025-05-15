@@ -1,158 +1,128 @@
-# Testing Setup Guide
+# Testing Setup Documentation
 
-This document provides a comprehensive guide to implementing a robust testing setup in your Node.js/React projects, based on the Weather App's testing architecture.
+This document provides a comprehensive guide to the testing setup used in this project. The setup is designed to be reusable across different projects and includes various types of testing.
 
 ## Table of Contents
-1. [Overview](#overview)
-2. [Setup Instructions](#setup-instructions)
-3. [Test Categories](#test-categories)
-4. [Best Practices](#best-practices)
-5. [Performance Testing](#performance-testing)
-6. [Frontend Testing](#frontend-testing)
-7. [Backend Testing](#backend-testing)
-8. [Continuous Integration](#continuous-integration)
-9. [Troubleshooting](#troubleshooting)
+1. [Setup Overview](#setup-overview)
+2. [Test Types](#test-types)
+3. [Running Tests](#running-tests)
+4. [Test Utilities](#test-utilities)
+5. [Best Practices](#best-practices)
+6. [Common Patterns](#common-patterns)
 
-## Overview
+## Setup Overview
 
-This testing setup provides a comprehensive framework for testing Node.js/React applications, including:
-- Unit testing
-- Integration testing
-- Performance testing
-- Frontend component testing
-- API endpoint testing
-- Memory usage monitoring
-- Concurrent request handling
+The testing setup includes:
+- Jest for unit and integration testing
+- React Testing Library for component testing
+- Cypress for E2E testing
+- Performance testing utilities
+- Snapshot testing
+- Mock utilities
 
-## Setup Instructions
+### Key Files
+- `tests/setup/setupTests.js`: Global test configuration
+- `tests/utils/testUtils.js`: Common testing utilities
+- `tests/factories/`: Test data factories
+- `cypress/`: E2E test configuration and specs
 
-1. Install required dependencies:
+## Test Types
+
+### 1. Unit Tests
+```javascript
+// Example unit test
+describe('WeatherService', () => {
+  it('should fetch weather data', async () => {
+    const weather = await WeatherService.getWeather('London');
+    expect(weather).toHaveProperty('temperature');
+  });
+});
+```
+
+### 2. Component Tests
+```javascript
+// Example component test
+describe('CityCard', () => {
+  it('should render city information', () => {
+    const { getByText } = render(<CityCard city="London" />);
+    expect(getByText('London')).toBeInTheDocument();
+  });
+});
+```
+
+### 3. Integration Tests
+```javascript
+// Example integration test
+describe('Weather App Integration', () => {
+  it('should update weather when searching', async () => {
+    const { getByPlaceholderText, getByText } = render(<App />);
+    await userEvent.type(getByPlaceholderText('Enter city'), 'London');
+    await userEvent.click(getByText('Search'));
+    expect(getByText('London')).toBeInTheDocument();
+  });
+});
+```
+
+### 4. E2E Tests
+```javascript
+// Example E2E test
+describe('Weather App E2E', () => {
+  it('should search for weather', () => {
+    cy.visit('/');
+    cy.get('input').type('London');
+    cy.get('button').click();
+    cy.contains('London').should('be.visible');
+  });
+});
+```
+
+## Running Tests
+
+### Available Scripts
 ```bash
-npm install --save-dev @babel/core @babel/preset-env @babel/preset-react babel-jest chai chai-http jest supertest @testing-library/react @testing-library/jest-dom @testing-library/user-event
+# Run all tests
+npm test
+
+# Run specific test types
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run E2E tests with UI
+npm run cypress:open
 ```
 
-2. Create configuration files:
+### Test Coverage
+- Coverage reports are generated automatically
+- View coverage by running `npm run test:coverage`
+- Coverage thresholds are set in `jest.config.js`
 
-`jest.config.cjs`:
+## Test Utilities
+
+### Common Utilities
 ```javascript
-module.exports = {
-  testEnvironment: 'node',
-  transform: {
-    '^.+\\.(js|jsx)$': 'babel-jest',
-  },
-  moduleNameMapper: {
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-  },
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  collectCoverageFrom: [
-    'src/**/*.{js,jsx}',
-    '!src/**/*.test.{js,jsx}',
-    '!src/index.js',
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
-    },
-  },
-};
-```
+import { renderWithProviders, mockFetch, wait } from '../utils/testUtils';
 
-`babel.config.cjs`:
-```javascript
-module.exports = {
-  presets: [
-    ['@babel/preset-env', { targets: { node: 'current' } }],
-    '@babel/preset-react',
-  ],
-};
-```
-
-3. Add test scripts to `package.json`:
-```json
-{
-  "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:backend": "jest tests/backend --coverage",
-    "test:frontend": "jest tests/frontend --coverage",
-    "test:performance": "jest tests/performance"
-  }
-}
-```
-
-## Test Categories
-
-### 1. Backend Tests
-- API endpoint testing
-- Data validation
-- Error handling
-- Database operations
-- Authentication/Authorization
-
-Example (`tests/backend/api.test.js`):
-```javascript
-import chai from 'chai';
-import chaiHttp from 'chai-http';
-
-chai.use(chaiHttp);
-const expect = chai.expect;
-
-describe('API Tests', () => {
-  it('should handle API requests correctly', async () => {
-    const response = await chai
-      .request('http://localhost:8000')
-      .get('/api/endpoint')
-      .query({ param: 'value' });
-    
-    expect(response).to.have.status(200);
-    expect(response.body).to.have.property('data');
+// Example usage
+describe('Component', () => {
+  it('should handle async operations', async () => {
+    mockFetch({ data: 'test' });
+    const { getByText } = renderWithProviders(<Component />);
+    await wait(100);
+    expect(getByText('test')).toBeInTheDocument();
   });
 });
 ```
 
-### 2. Frontend Tests
-- Component testing
-- Integration testing
-- User interface testing
-- State management
-- Event handling
-
-Example (`tests/frontend/component.test.js`):
-```javascript
-import { render, screen, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
-
-describe('Component Tests', () => {
-  it('should render component correctly', () => {
-    render(<YourComponent />);
-    expect(screen.getByTestId('component')).toBeInTheDocument();
-  });
-});
-```
-
-### 3. Performance Tests
-- Response time testing
-- Load testing
-- Memory usage monitoring
-- Concurrent request handling
-
-Example (`tests/performance/load.test.js`):
-```javascript
-import { performance } from 'perf_hooks';
-
-describe('Performance Tests', () => {
-  it('should respond within 500ms', async () => {
-    const start = performance.now();
-    // Your test code here
-    const end = performance.now();
-    expect(end - start).toBeLessThan(500);
-  });
-});
-```
+### Mock Functions
+- `mockLocalStorage()`: Mock browser storage
+- `mockGeolocation()`: Mock location services
+- `mockIntersectionObserver()`: Mock intersection observer
+- `mockResizeObserver()`: Mock resize observer
 
 ## Best Practices
 
@@ -161,137 +131,83 @@ describe('Performance Tests', () => {
    - Use clear, descriptive test names
    - Follow the Arrange-Act-Assert pattern
 
-2. **Test Isolation**
-   - Each test should be independent
-   - Clean up after each test
-   - Mock external dependencies
+2. **Component Testing**
+   - Test behavior, not implementation
+   - Use data-testid attributes sparingly
+   - Test accessibility features
 
-3. **Coverage Requirements**
-   - Minimum 80% code coverage
-   - Test all critical paths
-   - Include edge cases
+3. **Async Testing**
+   - Use async/await for asynchronous operations
+   - Handle loading states
    - Test error scenarios
 
-4. **Performance Requirements**
-   - API response time < 500ms
-   - Handle 10+ concurrent requests
-   - Memory usage < 50MB under load
-   - CPU utilization < 70% under load
+4. **Mocking**
+   - Mock external dependencies
+   - Use factories for test data
+   - Clean up mocks after tests
 
-## Performance Testing
+## Common Patterns
 
-1. **Response Time Testing**
+### Testing API Calls
 ```javascript
-it('should respond within 500ms', async () => {
-  const start = performance.now();
-  const response = await makeRequest();
-  const end = performance.now();
-  expect(end - start).toBeLessThan(500);
-});
-```
-
-2. **Concurrent Request Testing**
-```javascript
-it('should handle concurrent requests', async () => {
-  const requests = Array(10).fill().map(() => makeRequest());
-  const responses = await Promise.all(requests);
-  responses.forEach(response => {
-    expect(response.status).toBe(200);
+describe('API', () => {
+  it('should handle API calls', async () => {
+    mockFetch({ data: 'test' });
+    const result = await api.getData();
+    expect(result).toEqual({ data: 'test' });
   });
 });
 ```
 
-3. **Memory Usage Testing**
+### Testing User Interactions
 ```javascript
-it('should maintain stable memory usage', async () => {
-  const initialMemory = process.memoryUsage().heapUsed;
-  // Your test code here
-  const finalMemory = process.memoryUsage().heapUsed;
-  expect(finalMemory - initialMemory).toBeLessThan(50 * 1024 * 1024);
+describe('User Interactions', () => {
+  it('should handle user input', async () => {
+    const { getByRole } = render(<Component />);
+    await userEvent.type(getByRole('textbox'), 'test');
+    expect(getByRole('textbox')).toHaveValue('test');
+  });
 });
 ```
 
-## Frontend Testing
-
-1. **Component Testing**
+### Testing Error States
 ```javascript
-it('should render component correctly', () => {
-  render(<YourComponent />);
-  expect(screen.getByTestId('component')).toBeInTheDocument();
+describe('Error Handling', () => {
+  it('should handle errors', async () => {
+    mockFetch(new Error('API Error'));
+    const { getByText } = render(<Component />);
+    await wait(100);
+    expect(getByText('Error occurred')).toBeInTheDocument();
+  });
 });
 ```
 
-2. **User Interaction Testing**
-```javascript
-it('should handle user interactions', async () => {
-  render(<YourComponent />);
-  fireEvent.click(screen.getByRole('button'));
-  expect(screen.getByText('Updated')).toBeInTheDocument();
-});
-```
+## Adding to New Projects
 
-## Backend Testing
+1. Copy the following files:
+   - `tests/setup/setupTests.js`
+   - `tests/utils/testUtils.js`
+   - `jest.config.js`
+   - `cypress.config.js`
 
-1. **API Testing**
-```javascript
-it('should handle API requests', async () => {
-  const response = await request(app)
-    .get('/api/endpoint')
-    .query({ param: 'value' });
-  expect(response.status).toBe(200);
-});
-```
+2. Install dependencies:
+   ```bash
+   npm install --save-dev jest @testing-library/react @testing-library/jest-dom cypress
+   ```
 
-2. **Error Handling**
-```javascript
-it('should handle errors correctly', async () => {
-  const response = await request(app)
-    .get('/api/invalid-endpoint');
-  expect(response.status).toBe(404);
-});
-```
+3. Update package.json scripts:
+   ```json
+   {
+     "scripts": {
+       "test": "jest",
+       "test:watch": "jest --watch",
+       "test:coverage": "jest --coverage",
+       "test:e2e": "cypress run",
+       "cypress:open": "cypress open"
+     }
+   }
+   ```
 
-## Continuous Integration
+4. Configure your test environment in `jest.config.js`
 
-1. **GitHub Actions Setup**
-```yaml
-name: Tests
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-      - run: npm install
-      - run: npm test
-```
-
-## Troubleshooting
-
-Common issues and solutions:
-
-1. **Test Timeouts**
-   - Increase timeout limits in Jest config
-   - Check for async operations not being awaited
-
-2. **Memory Leaks**
-   - Ensure proper cleanup in afterEach/afterAll
-   - Check for unclosed connections
-
-3. **Flaky Tests**
-   - Ensure test isolation
-   - Mock external dependencies
-   - Use proper async/await patterns
-
-4. **Slow Tests**
-   - Optimize test setup
-   - Use proper mocking
-   - Consider parallel test execution
-
-## Additional Resources
-
-- [Jest Documentation](https://jestjs.io/docs/getting-started)
-- [Testing Library Documentation](https://testing-library.com/docs/)
-- [Chai Documentation](https://www.chaijs.com/)
-- [Supertest Documentation](https://github.com/visionmedia/supertest) 
+5. Start writing tests following the patterns in this documentation 

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useCallback, memo } from 'react';
+import PropTypes from 'prop-types';
 import { MdClose } from 'react-icons/md';
 import './CityCard.css';
 
-const CityCard = ({
+const CityCard = memo(({
   city,
   main,
   weather,
@@ -11,88 +12,88 @@ const CityCard = ({
   deleteCity,
   id,
 }) => {
-  //useState for card flip
-  const [isFrontSide, setIsFrontSide] = useState(true);
+  const handleDelete = useCallback((e) => {
+    e.stopPropagation(); // Prevent card flip when clicking delete
+    deleteCity(id);
+  }, [deleteCity, id]);
+
+  const handleFlip = useCallback((e) => {
+    const card = e.currentTarget;
+    card.classList.toggle('flipped');
+  }, []);
 
   return (
-    <div className='card-container'>
+    <div className='card-container' onClick={handleFlip}>
       {/* card flip container */}
-      <div
-        data-testid='t_flipped_container'
-        className={['flipped-container', isFrontSide ? 'front' : 'back'].join(
-          ' '
-        )}
-        onClick={() => setIsFrontSide((prev) => !prev)}
-      >
-        <div
-          //if city name length is more than 9 make it smaller font-size
-          className={['city-name', city.length >= 9 ? 'long-name' : ''].join(
-            ' '
-          )}
-        >
-          <p>{city}</p>
+      <div className='flipped-container'>
+        <div className='card-front'>
+          <h2 className='city-name'>{city}</h2>
+          <div className='weather-info'>
+            <img 
+              src={`http://openweathermap.org/img/wn/${weather[0].icon}@2x.png`} 
+              alt={weather[0].description} 
+              className='weather-icon'
+              loading="lazy"
+            />
+            <div className='temperature'>
+              <span className='temp-value'>{Math.round(main.temp)}°C</span>
+              <span className='feels-like'>Feels like: {Math.round(main.feels_like)}°C</span>
+            </div>
+          </div>
+          <div className='weather-description'>
+            {weather[0].description.charAt(0).toUpperCase() + weather[0].description.slice(1)}
+          </div>
         </div>
-        <div className='info-container'>
-          {isFrontSide ? (
-            // front side of card
-            <>
-              <p className='info-item first'>{main.temp.toFixed(0)}° C</p>
-              <p className='info-item'>{main.pressure} Pa</p>
-
-              <div className='img-container'>
-                <img
-                  className='img'
-                  alt='weather_icon'
-                  src={require(`../../public/img/${weather[0].icon.slice(
-                    0,
-                    2
-                  )}.svg`)}
-                />
-              </div>
-
-              <p className='description'>{weather[0].description}</p>
-            </>
-          ) : (
-            // back side of card with more information
-            <>
-              <p className='info-item-back'>
-                Min {main.temp_min.toFixed(0)}° C
-              </p>
-              <p className='info-item-back'>
-                Max {main.temp_max.toFixed(0)}° C
-              </p>
-              <p className='info-item-back'>
-                Feels like {main.feels_like.toFixed(0)}° C
-              </p>
-              <p className='info-item-back'>Humidity {main.humidity}%</p>
-              <p className='info-item-back'>
-                Visibility {visibility / 1000}/10 km
-              </p>
-              <p className='info-item-back last'>Wind {wind.speed} m/s</p>
-            </>
-          )}
-        </div>
-        {/* help text on the right side of the card */}
-        <div className='help-text-container'>
-          {isFrontSide ? (
-            <p className='help-text-front'>Click for more information</p>
-          ) : (
-            <p className='help-text-back'>Click for less information</p>
-          )}
+        <div className='card-back'>
+          <div className='info-item-back'>
+            <span className='info-label'>Pressure:</span>
+            <span className='info-value'>{main.pressure} hPa</span>
+          </div>
+          <div className='info-item-back'>
+            <span className='info-label'>Humidity:</span>
+            <span className='info-value'>{main.humidity}%</span>
+          </div>
+          <div className='info-item-back'>
+            <span className='info-label'>Wind Speed:</span>
+            <span className='info-value'>{wind.speed} m/s</span>
+          </div>
+          <div className='info-item-back'>
+            <span className='info-label'>Visibility:</span>
+            <span className='info-value'>{visibility / 1000} km</span>
+          </div>
+          <button 
+            className='btn-delete' 
+            onClick={handleDelete}
+            aria-label={`Delete ${city} weather card`}
+          >
+            <MdClose color='white' size={24} />
+          </button>
         </div>
       </div>
-      {/* btn for delete the city */}
-      <button
-        data-testid='t_btn_delete'
-        className='btn-delete'
-        onClick={() => deleteCity(id)}
-      >
-        <div className='btn-div'>
-          <MdClose color='white' />
-        </div>
-      </button>
     </div>
   );
+});
+
+CityCard.propTypes = {
+  city: PropTypes.string.isRequired,
+  main: PropTypes.shape({
+    temp: PropTypes.number.isRequired,
+    feels_like: PropTypes.number.isRequired,
+    pressure: PropTypes.number.isRequired,
+    humidity: PropTypes.number.isRequired,
+  }).isRequired,
+  weather: PropTypes.arrayOf(
+    PropTypes.shape({
+      description: PropTypes.string.isRequired,
+      icon: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  wind: PropTypes.shape({
+    speed: PropTypes.number.isRequired,
+  }).isRequired,
+  visibility: PropTypes.number.isRequired,
+  deleteCity: PropTypes.func.isRequired,
+  id: PropTypes.number.isRequired,
 };
 
 export default CityCard;
