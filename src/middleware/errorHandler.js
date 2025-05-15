@@ -42,6 +42,21 @@ const CIRCUIT_BREAKER_CONFIG = {
   halfOpenTimeout: 5000 // 5 seconds
 };
 
+// Service-specific circuit breaker configurations
+const SERVICE_CONFIGS = {
+  weather: {
+    failureThreshold: 3,
+    resetTimeout: 15000,
+    halfOpenTimeout: 3000
+  },
+  forecast: {
+    failureThreshold: 4,
+    resetTimeout: 20000,
+    halfOpenTimeout: 4000
+  },
+  default: CIRCUIT_BREAKER_CONFIG
+};
+
 // Circuit breaker state
 const circuitBreakers = new Map();
 
@@ -55,10 +70,12 @@ const calculateRetryDelay = (attempt) => {
 
 const getCircuitBreaker = (service) => {
   if (!circuitBreakers.has(service)) {
+    const config = SERVICE_CONFIGS[service] || SERVICE_CONFIGS.default;
     circuitBreakers.set(service, {
       failures: 0,
       lastFailureTime: null,
-      state: 'CLOSED'
+      state: 'CLOSED',
+      config
     });
   }
   return circuitBreakers.get(service);
@@ -75,7 +92,7 @@ const updateCircuitBreaker = (service, success) => {
     breaker.failures++;
     breaker.lastFailureTime = now;
 
-    if (breaker.failures >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
+    if (breaker.failures >= breaker.config.failureThreshold) {
       breaker.state = 'OPEN';
     }
   }
@@ -86,7 +103,7 @@ const isCircuitBreakerOpen = (service) => {
   const now = Date.now();
 
   if (breaker.state === 'OPEN') {
-    if (now - breaker.lastFailureTime >= CIRCUIT_BREAKER_CONFIG.resetTimeout) {
+    if (now - breaker.lastFailureTime >= breaker.config.resetTimeout) {
       breaker.state = 'HALF-OPEN';
       return false;
     }
@@ -94,7 +111,7 @@ const isCircuitBreakerOpen = (service) => {
   }
 
   if (breaker.state === 'HALF-OPEN') {
-    if (now - breaker.lastFailureTime >= CIRCUIT_BREAKER_CONFIG.halfOpenTimeout) {
+    if (now - breaker.lastFailureTime >= breaker.config.halfOpenTimeout) {
       breaker.state = 'CLOSED';
       return false;
     }
