@@ -134,11 +134,32 @@ const performanceMonitor = async (ctx, next) => {
     // Remove metrics from storage
     metrics.delete(traceId);
   } catch (error) {
+    // Clean up performance marks and measures in case of error
+    try {
+      performance.clearMarks(`request-start-${traceId}`);
+      performance.clearMarks(`request-end-${traceId}`);
+      performance.clearMeasures(`request-duration-${traceId}`);
+    } catch (cleanupError) {
+      logger.error('Error cleaning up performance marks:', {
+        error: cleanupError,
+        traceId
+      });
+    }
+    
+    // Remove metrics from storage
+    metrics.delete(traceId);
+    
+    // Log the error with enhanced context
     logger.error('Performance monitoring error:', {
       error,
       traceId,
-      requestId: ctx.state.requestId
+      requestId: ctx.state.requestId,
+      path: ctx.path,
+      method: ctx.method,
+      status: ctx.status
     });
+    
+    // Continue with the request
     await next();
   }
 };

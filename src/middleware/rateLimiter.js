@@ -23,12 +23,30 @@ const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
   }
 });
 
-redis.on('error', (err) => {
-  logger.error('Redis error:', err);
-});
+// Track Redis connection status
+let isConnected = false;
+let lastError = null;
 
 redis.on('connect', () => {
+  isConnected = true;
+  lastError = null;
   logger.info('Redis connected successfully');
+});
+
+redis.on('error', (err) => {
+  isConnected = false;
+  lastError = err;
+  logger.error('Redis error:', {
+    error: err,
+    code: err.code,
+    message: err.message,
+    stack: err.stack
+  });
+});
+
+redis.on('close', () => {
+  isConnected = false;
+  logger.warn('Redis connection closed');
 });
 
 redis.on('reconnecting', () => {
@@ -50,6 +68,13 @@ const rateLimiter = async (ctx, next) => {
   const key = `ratelimit:${ip}`;
   
   try {
+    // Check Redis connection status
+    if (!isConnected) {
+      logger.warn('Redis not connected, allowing request');
+      await next();
+      return;
+    }
+    
     // Get current count and expiry from Redis
     const [count, ttl] = await Promise.all([
       redis.get(key),
@@ -95,7 +120,19 @@ const rateLimiter = async (ctx, next) => {
     
     await next();
   } catch (error) {
-    logger.error('Rate limiter error:', error);
+    logger.error('Rate limiter error:', {
+      error,
+      ip,
+      path: ctx.path,
+      method: ctx.method,
+      redisStatus: {
+        connected: isConnected,
+        lastError: lastError ? {
+          code: lastError.code,
+          message: lastError.message
+        } : null
+      }
+    });
     // If Redis fails, allow the request but log the error
     await next();
   }
