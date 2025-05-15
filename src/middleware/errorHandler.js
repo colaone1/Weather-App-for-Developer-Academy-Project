@@ -42,21 +42,6 @@ const CIRCUIT_BREAKER_CONFIG = {
   halfOpenTimeout: 5000 // 5 seconds
 };
 
-// Service-specific circuit breaker configurations
-const SERVICE_CONFIGS = {
-  weather: {
-    failureThreshold: 3,
-    resetTimeout: 15000,
-    halfOpenTimeout: 3000
-  },
-  forecast: {
-    failureThreshold: 4,
-    resetTimeout: 20000,
-    halfOpenTimeout: 4000
-  },
-  default: CIRCUIT_BREAKER_CONFIG
-};
-
 // Circuit breaker state
 const circuitBreakers = new Map();
 
@@ -230,6 +215,21 @@ const errorHandler = async (ctx, next) => {
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
+};
+
+// Service-specific circuit breaker configurations
+const SERVICE_CONFIGS = {
+  weather: {
+    failureThreshold: 3,
+    resetTimeout: 15000,
+    halfOpenTimeout: 3000
+  },
+  forecast: {
+    failureThreshold: 4,
+    resetTimeout: 20000,
+    halfOpenTimeout: 4000
+  },
+  default: CIRCUIT_BREAKER_CONFIG
 };
 
 export default errorHandler; 
