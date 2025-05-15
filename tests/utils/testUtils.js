@@ -169,8 +169,8 @@ export class MockErrorBoundary extends React.Component {
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
-  componentDidCatch(error, errorInfo) {
-    // console.error('Error caught by boundary:', error, errorInfo);
+  componentDidCatch(_error, _errorInfo) {
+    // console.error('Error caught by boundary:', _error, _errorInfo);
   }
   render() {
     if (this.state.hasError) {
@@ -282,19 +282,19 @@ export const cleanup = () => {
   performance.getEntriesByName.mockClear();
   performance.getEntries.mockClear();
   performance.now.mockClear();
-  console.error.mockClear();
-  console.warn.mockClear();
-  console.log.mockClear();
-  console.info.mockClear();
-  console.debug.mockClear();
-  console.trace.mockClear();
-  console.group.mockClear();
-  console.groupEnd.mockClear();
-  console.groupCollapsed.mockClear();
-  console.time.mockClear();
-  console.timeEnd.mockClear();
-  console.timeLog.mockClear();
-  console.assert.mockClear();
+  // console.error.mockClear();
+  // console.warn.mockClear();
+  // console.log.mockClear();
+  // console.info.mockClear();
+  // console.debug.mockClear();
+  // console.trace.mockClear();
+  // console.group.mockClear();
+  // console.groupEnd.mockClear();
+  // console.groupCollapsed.mockClear();
+  // console.time.mockClear();
+  // console.timeEnd.mockClear();
+  // console.timeLog.mockClear();
+  // console.assert.mockClear();
   global.requestIdleCallback.mockClear();
   global.cancelIdleCallback.mockClear();
   global.requestAnimationFrame.mockClear();
