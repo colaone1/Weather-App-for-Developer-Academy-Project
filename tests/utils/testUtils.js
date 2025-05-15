@@ -7,31 +7,31 @@ import { configureStore } from '@reduxjs/toolkit';
 import rootReducer from '../../src/store/rootReducer';
 
 // Custom render function that includes providers
-export function renderWithProviders(
+export const renderWithProviders = (
   ui,
   {
     preloadedState = {},
-    store = configureStore({ reducer: rootReducer, preloadedState }),
+    store = configureStore({
+      reducer: rootReducer,
+      preloadedState
+    }),
     route = '/',
-    history = createMemoryHistory({ initialEntries: [route] }),
-    ...renderOptions
+    history = createMemoryHistory({ initialEntries: [route] })
   } = {}
-) {
-  function Wrapper({ children }) {
-    return (
-      <Provider store={store}>
-        <Router location={history.location} navigator={history}>
-          {children}
-        </Router>
-      </Provider>
-    );
-  }
+) => {
+  const Wrapper = ({ children }) => (
+    <Provider store={store}>
+      <Router location={history.location} navigator={history}>
+        {children}
+      </Router>
+    </Provider>
+  );
   return {
+    ...render(ui, { wrapper: Wrapper }),
     store,
-    history,
-    ...render(ui, { wrapper: Wrapper, ...renderOptions })
+    history
   };
-}
+};
 
 // Mock IntersectionObserver
 export const mockIntersectionObserver = () => {
@@ -55,41 +55,49 @@ export const mockResizeObserver = () => {
   window.ResizeObserver = mockResizeObserver;
 };
 
-// Mock matchMedia
-export const mockMatchMedia = () => {
+// Mock matchMedia (keep only this robust implementation)
+export const mockMatchMedia = (matches = false) => {
+  const mediaQueryList = {
+    matches,
+    media: '',
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn()
+  };
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: jest.fn().mockImplementation(query => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    })),
+      ...mediaQueryList,
+      media: query
+    }))
   });
+  return mediaQueryList;
 };
 
-// Mock localStorage
+// Mock localStorage (keep only this robust implementation)
 export const mockLocalStorage = () => {
-  const localStorageMock = {
-    getItem: jest.fn(),
-    setItem: jest.fn(),
-    clear: jest.fn(),
-    removeItem: jest.fn(),
+  const store = new Map();
+  const localStorage = {
+    getItem: jest.fn((key) => store.get(key) || null),
+    setItem: jest.fn((key, value) => store.set(key, value)),
+    removeItem: jest.fn((key) => store.delete(key)),
+    clear: jest.fn(() => store.clear()),
+    key: jest.fn((index) => Array.from(store.keys())[index]),
+    get length() { return store.size; }
   };
   Object.defineProperty(window, 'localStorage', {
-    value: localStorageMock,
+    value: localStorage,
+    writable: true
   });
-  return localStorageMock;
+  return localStorage;
 };
 
 // Mock fetch with error handling
 export const mockFetch = (response, options = {}) => {
   const { error = false, status = 200, delay = 0 } = options;
-  
   return new Promise((resolve) => {
     setTimeout(() => {
       if (error) {
@@ -122,11 +130,10 @@ export const mockConsole = () => {
 // Wait utility
 export const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Mock geolocation
+// Mock geolocation (keep only this robust implementation)
 export const mockGeolocation = (coords = { latitude: 51.5074, longitude: -0.1278 }) => {
   const mockGeolocation = {
-    getCurrentPosition: jest.fn()
-      .mockImplementation((success) => success({ coords })),
+    getCurrentPosition: jest.fn().mockImplementation((success) => success({ coords })),
     watchPosition: jest.fn(),
     clearWatch: jest.fn(),
   };
@@ -153,21 +160,18 @@ export const mockPerformance = () => {
   return performance;
 };
 
-// Mock error boundary
+// Mock Error Boundary component
 export class MockErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null };
   }
-
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
-
   componentDidCatch(error, errorInfo) {
     console.error('Error caught by boundary:', error, errorInfo);
   }
-
   render() {
     if (this.state.hasError) {
       return this.props.fallback || <div>Something went wrong</div>;
@@ -176,17 +180,18 @@ export class MockErrorBoundary extends React.Component {
   }
 }
 
-// Mock suspense boundary
-export function MockSuspense({ children, fallback = <div>Loading...</div> }) {
-  return (
-    <React.Suspense fallback={fallback}>
-      {children}
-    </React.Suspense>
-  );
-}
+// Mock Suspense component
+export const MockSuspense = ({ children, fallback = <div>Loading...</div> }) => {
+  const [isLoading, setIsLoading] = React.useState(true);
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 0);
+    return () => clearTimeout(timer);
+  }, []);
+  return isLoading ? fallback : children;
+};
 
 // Mock API response
-export function mockApiResponse(data, status = 200, delay = 0) {
+export const mockApiResponse = (data, status = 200, delay = 0) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
@@ -200,106 +205,74 @@ export function mockApiResponse(data, status = 200, delay = 0) {
       });
     }, delay);
   });
-}
+};
 
 // Mock API error
-export function mockApiError(status = 500, message = 'Internal Server Error') {
-  return new Promise((resolve) => {
-    resolve({
-      ok: false,
-      status,
-      json: () => Promise.resolve({ message }),
-      text: () => Promise.resolve(message),
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      })
-    });
+export const mockApiError = (error, status = 500) => {
+  return Promise.reject({
+    ok: false,
+    status,
+    json: () => Promise.resolve({ error }),
+    text: () => Promise.resolve(JSON.stringify({ error })),
+    headers: new Headers({
+      'Content-Type': 'application/json'
+    })
   });
-}
-
-// Mock geolocation
-export function mockGeolocation(position = {
-  coords: {
-    latitude: 60.1695,
-    longitude: 24.9355,
-    accuracy: 10
-  },
-  timestamp: Date.now()
-}) {
-  return {
-    getCurrentPosition: jest.fn().mockImplementation((success) => success(position)),
-    watchPosition: jest.fn().mockImplementation((success) => {
-      success(position);
-      return 1;
-    }),
-    clearWatch: jest.fn()
-  };
-}
+};
 
 // Mock performance marks
-export function mockPerformanceMarks() {
+export const mockPerformanceMarks = () => {
   const marks = new Map();
   const measures = new Map();
-
-  return {
-    mark: jest.fn().mockImplementation((name) => {
-      marks.set(name, performance.now());
+  
+  const performance = {
+    mark: jest.fn((name) => marks.set(name, performance.now())),
+    measure: jest.fn((name, start, end) => {
+      const startTime = marks.get(start) || 0;
+      const endTime = marks.get(end) || performance.now();
+      measures.set(name, endTime - startTime);
     }),
-    measure: jest.fn().mockImplementation((name, startMark, endMark) => {
-      const start = marks.get(startMark);
-      const end = marks.get(endMark);
-      measures.set(name, { start, end, duration: end - start });
+    getEntriesByType: jest.fn((type) => {
+      if (type === 'mark') return Array.from(marks.entries()).map(([name, time]) => ({ name, time }));
+      if (type === 'measure') return Array.from(measures.entries()).map(([name, duration]) => ({ name, duration }));
+      return [];
     }),
-    getEntriesByType: jest.fn().mockImplementation((type) => {
-      return type === 'mark' ? Array.from(marks.entries()) : Array.from(measures.entries());
-    }),
-    clearMarks: jest.fn().mockImplementation(() => marks.clear()),
-    clearMeasures: jest.fn().mockImplementation(() => measures.clear())
+    clearMarks: jest.fn(() => marks.clear()),
+    clearMeasures: jest.fn(() => measures.clear()),
+    now: jest.fn(() => Date.now())
   };
-}
-
-// Mock localStorage
-export function mockLocalStorage() {
-  const store = new Map();
-  return {
-    getItem: jest.fn().mockImplementation((key) => store.get(key) || null),
-    setItem: jest.fn().mockImplementation((key, value) => store.set(key, value)),
-    removeItem: jest.fn().mockImplementation((key) => store.delete(key)),
-    clear: jest.fn().mockImplementation(() => store.clear()),
-    key: jest.fn().mockImplementation((index) => Array.from(store.keys())[index]),
-    get length() { return store.size; }
-  };
-}
+  
+  Object.defineProperty(window, 'performance', {
+    value: performance,
+    writable: true
+  });
+  
+  return performance;
+};
 
 // Mock sessionStorage
-export function mockSessionStorage() {
+export const mockSessionStorage = () => {
   const store = new Map();
-  return {
-    getItem: jest.fn().mockImplementation((key) => store.get(key) || null),
-    setItem: jest.fn().mockImplementation((key, value) => store.set(key, value)),
-    removeItem: jest.fn().mockImplementation((key) => store.delete(key)),
-    clear: jest.fn().mockImplementation(() => store.clear()),
-    key: jest.fn().mockImplementation((index) => Array.from(store.keys())[index]),
+  
+  const sessionStorage = {
+    getItem: jest.fn((key) => store.get(key) || null),
+    setItem: jest.fn((key, value) => store.set(key, value)),
+    removeItem: jest.fn((key) => store.delete(key)),
+    clear: jest.fn(() => store.clear()),
+    key: jest.fn((index) => Array.from(store.keys())[index]),
     get length() { return store.size; }
   };
-}
-
-// Mock matchMedia
-export function mockMatchMedia(matches = false) {
-  return jest.fn().mockImplementation((query) => ({
-    matches,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn()
-  }));
-}
+  
+  Object.defineProperty(window, 'sessionStorage', {
+    value: sessionStorage,
+    writable: true
+  });
+  
+  return sessionStorage;
+};
 
 // Clean up after each test
-export function cleanup() {
+export const cleanup = () => {
   jest.clearAllMocks();
   localStorage.clear();
   sessionStorage.clear();
@@ -326,10 +299,10 @@ export function cleanup() {
   global.cancelIdleCallback.mockClear();
   global.requestAnimationFrame.mockClear();
   global.cancelAnimationFrame.mockClear();
-}
+};
 
 // Mock WebSocket
-export function mockWebSocket() {
+export const mockWebSocket = () => {
   const mockWebSocket = jest.fn().mockImplementation(() => ({
     send: jest.fn(),
     close: jest.fn(),
@@ -344,10 +317,10 @@ export function mockWebSocket() {
   }));
   global.WebSocket = mockWebSocket;
   return mockWebSocket;
-}
+};
 
 // Mock Notification API
-export function mockNotification() {
+export const mockNotification = () => {
   const mockNotification = jest.fn().mockImplementation(() => ({
     close: jest.fn()
   }));
@@ -355,10 +328,10 @@ export function mockNotification() {
   mockNotification.permission = 'granted';
   global.Notification = mockNotification;
   return mockNotification;
-}
+};
 
 // Mock Service Worker
-export function mockServiceWorker() {
+export const mockServiceWorker = () => {
   const mockServiceWorker = {
     register: jest.fn().mockResolvedValue({
       unregister: jest.fn().mockResolvedValue(true),
@@ -367,10 +340,10 @@ export function mockServiceWorker() {
   };
   global.navigator.serviceWorker = mockServiceWorker;
   return mockServiceWorker;
-}
+};
 
 // Mock IndexedDB
-export function mockIndexedDB() {
+export const mockIndexedDB = () => {
   const mockIndexedDB = {
     open: jest.fn().mockImplementation(() => ({
       onupgradeneeded: null,
@@ -399,10 +372,10 @@ export function mockIndexedDB() {
   };
   global.indexedDB = mockIndexedDB;
   return mockIndexedDB;
-}
+};
 
 // Mock BroadcastChannel
-export function mockBroadcastChannel() {
+export const mockBroadcastChannel = () => {
   const mockBroadcastChannel = jest.fn().mockImplementation(() => ({
     postMessage: jest.fn(),
     close: jest.fn(),
@@ -412,19 +385,19 @@ export function mockBroadcastChannel() {
   }));
   global.BroadcastChannel = mockBroadcastChannel;
   return mockBroadcastChannel;
-}
+};
 
 // Mock Permissions API
-export function mockPermissions() {
+export const mockPermissions = () => {
   const mockPermissions = {
     query: jest.fn().mockResolvedValue({ state: 'granted' })
   };
   global.navigator.permissions = mockPermissions;
   return mockPermissions;
-}
+};
 
 // Mock Clipboard API
-export function mockClipboard() {
+export const mockClipboard = () => {
   const mockClipboard = {
     writeText: jest.fn().mockResolvedValue(undefined),
     readText: jest.fn().mockResolvedValue(''),
@@ -433,10 +406,10 @@ export function mockClipboard() {
   };
   global.navigator.clipboard = mockClipboard;
   return mockClipboard;
-}
+};
 
 // Mock Battery API
-export function mockBattery() {
+export const mockBattery = () => {
   const mockBattery = {
     charging: true,
     chargingTime: 0,
@@ -447,10 +420,10 @@ export function mockBattery() {
   };
   global.navigator.getBattery = jest.fn().mockResolvedValue(mockBattery);
   return mockBattery;
-}
+};
 
 // Mock Network Information API
-export function mockNetworkInfo() {
+export const mockNetworkInfo = () => {
   const mockNetworkInfo = {
     type: 'wifi',
     effectiveType: '4g',
@@ -462,40 +435,36 @@ export function mockNetworkInfo() {
   };
   global.navigator.connection = mockNetworkInfo;
   return mockNetworkInfo;
-}
+};
 
 // Mock Device Memory API
-export function mockDeviceMemory() {
-  const mockDeviceMemory = 8;
+export const mockDeviceMemory = (memory = 8) => {
   Object.defineProperty(global.navigator, 'deviceMemory', {
-    value: mockDeviceMemory,
+    value: memory,
     writable: true
   });
-  return mockDeviceMemory;
-}
+};
 
 // Mock Hardware Concurrency API
-export function mockHardwareConcurrency() {
-  const mockHardwareConcurrency = 4;
+export const mockHardwareConcurrency = (cores = 8) => {
   Object.defineProperty(global.navigator, 'hardwareConcurrency', {
-    value: mockHardwareConcurrency,
+    value: cores,
     writable: true
   });
-  return mockHardwareConcurrency;
-}
+};
 
 // Mock Vibration API
-export function mockVibration() {
+export const mockVibration = () => {
   const mockVibrate = jest.fn();
   Object.defineProperty(global.navigator, 'vibrate', {
     value: mockVibrate,
     writable: true
   });
   return mockVibrate;
-}
+};
 
 // Mock Screen Orientation API
-export function mockScreenOrientation() {
+export const mockScreenOrientation = () => {
   const mockScreenOrientation = {
     type: 'landscape-primary',
     angle: 0,
@@ -509,10 +478,10 @@ export function mockScreenOrientation() {
     writable: true
   });
   return mockScreenOrientation;
-}
+};
 
 // Mock Fullscreen API
-export function mockFullscreen() {
+export const mockFullscreen = () => {
   const mockFullscreen = {
     requestFullscreen: jest.fn().mockResolvedValue(undefined),
     exitFullscreen: jest.fn().mockResolvedValue(undefined),
@@ -538,4 +507,4 @@ export function mockFullscreen() {
     configurable: true
   });
   return mockFullscreen;
-} 
+}; 
