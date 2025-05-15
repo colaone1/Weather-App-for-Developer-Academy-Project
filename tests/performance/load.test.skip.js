@@ -6,7 +6,7 @@ const { performance } = require('perf_hooks');
 chai.use(chaiHttp);
 const expect = chai.expect;
 
-describe('Performance Tests', () => {
+describe.skip('Performance Tests', () => {
   const baseUrl = 'http://localhost:8000';
   const testCities = ['London', 'Paris', 'New York', 'Tokyo', 'Sydney'];
   

@@ -107,113 +107,14 @@ const isCircuitBreakerOpen = (service) => {
 };
 
 const errorHandler = async (ctx, next) => {
-  let attempt = 0;
-  const service = ctx.path.split('/')[2] || 'default'; // Extract service name from path
-  
-  // Check circuit breaker
-  if (isCircuitBreakerOpen(service)) {
-    ctx.status = 503;
+  try {
+    await next();
+  } catch (err) {
+    ctx.status = err.status || 500;
     ctx.body = {
-      error: {
-        message: 'Service temporarily unavailable',
-        status: 503,
-        category: ERROR_CATEGORIES.EXTERNAL_SERVICE,
-        requestId: ctx.state.requestId
-      }
+      error: err.message || 'Internal Server Error',
     };
-    return;
-  }
-  
-  while (attempt <= RETRY_CONFIG.maxRetries) {
-    try {
-      // Set request timeout
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-          reject(new Error('Request timeout'));
-        }, 30000); // 30 second timeout
-      });
-
-      // Race between the request and timeout
-      await Promise.race([next(), timeoutPromise]);
-      
-      // Update circuit breaker on success
-      updateCircuitBreaker(service, true);
-      return;
-    } catch (err) {
-      attempt++;
-      
-      // Log error with attempt information
-      logger.error('Error occurred:', {
-        error: err,
-        requestId: ctx.state.requestId,
-        path: ctx.path,
-        method: ctx.method,
-        query: ctx.query,
-        body: ctx.request.body,
-        attempt
-      });
-
-      // Determine error category
-      const status = err.status || 500;
-      const category = STATUS_TO_CATEGORY[status] || ERROR_CATEGORIES.INTERNAL;
-      
-      // Check if error is retryable
-      const isRetryable = (
-        category === ERROR_CATEGORIES.EXTERNAL_SERVICE ||
-        category === ERROR_CATEGORIES.NETWORK ||
-        category === ERROR_CATEGORIES.TIMEOUT
-      );
-      
-      // Update circuit breaker on failure
-      if (isRetryable) {
-        updateCircuitBreaker(service, false);
-      }
-      
-      // Enhanced error response
-      const errorResponse = {
-        error: {
-          message: err.message || 'Internal Server Error',
-          status,
-          category,
-          timestamp: new Date().toISOString(),
-          requestId: ctx.state.requestId,
-          attempt
-        }
-      };
-
-      // Add more details in development mode
-      if (process.env.NODE_ENV !== 'production') {
-        errorResponse.error.details = {
-          name: err.name,
-          stack: err.stack,
-          code: err.code,
-          path: ctx.path,
-          method: ctx.method,
-          query: ctx.query,
-          body: ctx.request.body
-        };
-      }
-
-      // If error is not retryable or we've exhausted retries, send error response
-      if (!isRetryable || attempt > RETRY_CONFIG.maxRetries) {
-        ctx.status = status;
-        ctx.body = errorResponse;
-
-        // Set appropriate headers
-        ctx.set('Content-Type', 'application/json');
-        if (status === 429) {
-          ctx.set('Retry-After', '60');
-        }
-        
-        // Add error category header
-        ctx.set('X-Error-Category', category);
-        return;
-      }
-
-      // Wait before retrying
-      const delay = calculateRetryDelay(attempt - 1);
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
+    ctx.app.emit('error', err, ctx);
   }
 };
 

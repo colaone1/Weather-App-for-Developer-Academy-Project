@@ -1,31 +1,22 @@
-"use client"; 
-import { useState, useEffect } from "react"; 
-import ApiClient from "../../ApiClient/client"; 
-import WeatherCard from "../components/WeatherCard";
+'use client';
+import { weatherApiClient } from '../lib/api-client';
+import WeatherCard from '../components/WeatherCard';
 
-export default function Home() {
-  const [weatherData, setWeatherData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [selectedCityIndex, setSelectedCityIndex] = useState("0");
-  const [error, setError] = useState(null);
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // Revalidate every hour
 
-  const client = new ApiClient();
+async function getWeatherData(cityIndex) {
+  try {
+    const data = await weatherApiClient.getSingleCityWeather(parseInt(cityIndex));
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: error.message };
+  }
+}
 
-  const fetchWeather = async () => {
-    try {
-      setLoading(true);
-      const response = await client.getSingleCityWeather(parseInt(selectedCityIndex));
-      setWeatherData([response]);
-    } catch (error) {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchWeather();
-  }, [selectedCityIndex]);
+export default async function Home({ searchParams }) {
+  const cityIndex = searchParams.city || '0';
+  const { data: weatherData, error } = await getWeatherData(cityIndex);
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -41,40 +32,42 @@ export default function Home() {
       <div className="text-center mb-12">
         <div className="mx-auto max-w-2xl p-6 rounded-2xl shadow-md bg-gradient-to-b from-cyan-200/50 to-sky-500/50 backdrop-blur-md border border-white/30">
           <h1 className="text-4xl font-bold mb-4 text-gray-900">Weather Forecast</h1>
-           <p className="text-gray-100">
-              Select a city to view its 7-day weather forecast!
-            </p>
+          <p className="text-gray-100">
+            Select a city to view its 7-day weather forecast!
+          </p>
         </div>
       </div>
       <select
-        value={selectedCityIndex}
-        onChange={(e) => setSelectedCityIndex(e.target.value)}
+        defaultValue={cityIndex}
+        onChange={(e) => {
+          const url = new URL(window.location.href);
+          url.searchParams.set('city', e.target.value);
+          window.location.href = url.toString();
+        }}
         className="mb-6 p-2 border rounded w-full max-w-xs mx-auto block bg-sky-300/60 backdrop-blur-sm shadow-md"
       >
-        {client.cities.map((city, index) => (
+        {weatherApiClient.cities.map((city, index) => (
           <option key={index} value={index}>
             {city.name}
           </option>
         ))}
       </select>   
 
-      {loading ? (
+      {!weatherData ? (
         <div className="text-center text-xl font-semibold">Loading...</div>
       ) : (
         <div className="grid justify-center place-items-center gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {weatherData?.map((cityData) => (
-            cityData.daily.time.map((time, index) => (
-              <WeatherCard
-                key={`${cityData.city || cityData.location}-${index}`}
-                day={formatDate(time)}
-                weatherCode={cityData.daily.weatherCode[index]}
-                maxTemp={cityData.daily.temperature2mMax[index]}
-                minTemp={cityData.daily.temperature2mMin[index]}
-                windSpeed={cityData.daily.windSpeed10mMax[index]}
-                precipSum={cityData.daily.precipitationSum[index]}
-                precipChance={cityData.daily.precipitationProbabilityMax[index]}
-              />
-            ))
+          {weatherData.daily.time.map((time, index) => (
+            <WeatherCard
+              key={`${weatherData.city}-${index}`}
+              day={formatDate(time)}
+              weatherCode={weatherData.daily.weatherCode[index]}
+              maxTemp={weatherData.daily.temperature2mMax[index]}
+              minTemp={weatherData.daily.temperature2mMin[index]}
+              windSpeed={weatherData.daily.windSpeed10mMax[index]}
+              precipSum={weatherData.daily.precipitationSum[index]}
+              precipChance={weatherData.daily.precipitationProbabilityMax[index]}
+            />
           ))}
         </div>
       )}

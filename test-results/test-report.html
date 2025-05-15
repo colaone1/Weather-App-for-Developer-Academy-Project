@@ -1,14 +1,314 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="7" failures="5" errors="0" time="33.162">
-  <testsuite name="Snapshot Tests" errors="0" failures="0" skipped="0" timestamp="2025-05-15T15:50:11" time="3.858" tests="2">
-    <testcase classname="Snapshot Tests" name="should match snapshot for CityCard component" time="0.074">
-    </testcase>
-    <testcase classname="Snapshot Tests" name="should match snapshot for flipped CityCard" time="0.036">
-    </testcase>
-  </testsuite>
-  <testsuite name="WeatherCard" errors="0" failures="5" skipped="0" timestamp="2025-05-15T15:50:10" time="29.387" tests="5">
-    <testcase classname="WeatherCard" name="renders weather information correctly" time="5.099">
-      <failure>Error: Unable to find an element with the text: /20°C/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+<html><head><meta charset="utf-8"/><title>Test Report</title><style type="text/css">html,
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+body {
+  padding: 2rem 1rem;
+  font-size: 0.85rem;
+}
+.jesthtml-content {
+  margin: 0 auto;
+  max-width: 70rem;
+}
+header {
+  display: flex;
+  align-items: center;
+}
+#title {
+  margin: 0;
+  flex-grow: 1;
+}
+#logo {
+  height: 4rem;
+}
+#timestamp {
+  color: #777;
+  margin-top: 0.5rem;
+}
+
+/** SUMMARY */
+#summary {
+  color: #333;
+  margin: 2rem 0;
+  display: flex;
+  font-family: monospace;
+  font-size: 1rem;
+}
+#summary > div {
+  margin-right: 2rem;
+  background: #eee;
+  padding: 1rem;
+  min-width: 15rem;
+}
+#summary > div:last-child {
+  margin-right: 0;
+}
+@media only screen and (max-width: 720px) {
+  #summary {
+    flex-direction: column;
+  }
+  #summary > div {
+    margin-right: 0;
+    margin-top: 2rem;
+  }
+  #summary > div:first-child {
+    margin-top: 0;
+  }
+}
+
+.summary-total {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.summary-passed {
+  color: #4f8a10;
+  border-left: 0.4rem solid #4f8a10;
+  padding-left: 0.5rem;
+}
+.summary-failed,
+.summary-obsolete-snapshots {
+  color: #d8000c;
+  border-left: 0.4rem solid #d8000c;
+  padding-left: 0.5rem;
+}
+.summary-pending {
+  color: #9f6000;
+  border-left: 0.4rem solid #9f6000;
+  padding-left: 0.5rem;
+}
+.summary-empty {
+  color: #999;
+  border-left: 0.4rem solid #999;
+}
+
+.test-result {
+  padding: 1rem;
+  margin-bottom: 0.25rem;
+}
+.test-result:last-child {
+  border: 0;
+}
+.test-result.passed {
+  background-color: #dff2bf;
+  color: #4f8a10;
+}
+.test-result.failed {
+  background-color: #ffbaba;
+  color: #d8000c;
+}
+.test-result.pending {
+  background-color: #ffdf61;
+  color: #9f6000;
+}
+
+.test-info {
+  display: flex;
+  justify-content: space-between;
+}
+.test-suitename {
+  width: 20%;
+  text-align: left;
+  font-weight: bold;
+  word-break: break-word;
+}
+.test-title {
+  width: 40%;
+  text-align: left;
+  font-style: italic;
+}
+.test-status {
+  width: 20%;
+  text-align: right;
+}
+.test-duration {
+  width: 10%;
+  text-align: right;
+  font-size: 0.75rem;
+}
+
+.failureMessages {
+  padding: 0 1rem;
+  margin-top: 1rem;
+  border-top: 1px dashed #d8000c;
+}
+.failureMessages.suiteFailure {
+  border-top: none;
+}
+.failureMsg {
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+
+.suite-container {
+  margin-bottom: 2rem;
+}
+.suite-container > input[type="checkbox"] {
+  position: absolute;
+  left: -100vw;
+}
+.suite-container label {
+  display: block;
+}
+.suite-container .suite-tests {
+  overflow-y: hidden;
+  height: 0;
+}
+.suite-container > input[type="checkbox"]:checked ~ .suite-tests {
+  height: auto;
+  overflow: visible;
+}
+.suite-info {
+  padding: 1rem;
+  background-color: #eee;
+  color: #777;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+.suite-info:hover {
+  background-color: #ddd;
+  cursor: pointer;
+}
+.suite-info .suite-path {
+  word-break: break-all;
+  flex-grow: 1;
+  font-family: monospace;
+  font-size: 1rem;
+}
+.suite-info .suite-time {
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.75rem;
+}
+.suite-info .suite-time.warn {
+  background-color: #d8000c;
+  color: #fff;
+}
+.suite-info:before {
+  content: "\2303";
+  display: inline-block;
+  margin-right: 0.5rem;
+  transform: rotate(0deg);
+}
+.suite-container > input[type="checkbox"]:checked ~ label .suite-info:before {
+  transform: rotate(180deg);
+}
+
+/* CONSOLE LOGS */
+.suite-consolelog {
+  margin-bottom: 0.25rem;
+  padding: 1rem;
+  background-color: #efefef;
+}
+.suite-consolelog-header {
+  font-weight: bold;
+}
+.suite-consolelog-item {
+  padding: 0.5rem;
+}
+.suite-consolelog-item pre {
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+.suite-consolelog-item-origin {
+  color: #777;
+  font-weight: bold;
+}
+.suite-consolelog-item-message {
+  color: #000;
+  font-size: 1rem;
+  padding: 0 0.5rem;
+}
+
+/* OBSOLETE SNAPSHOTS */
+.suite-obsolete-snapshots {
+  margin-bottom: 0.25rem;
+  padding: 1rem;
+  background-color: #ffbaba;
+  color: #d8000c;
+}
+.suite-obsolete-snapshots-header {
+  font-weight: bold;
+}
+.suite-obsolete-snapshots-item {
+  padding: 0.5rem;
+}
+.suite-obsolete-snapshots-item pre {
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+.suite-obsolete-snapshots-item-message {
+  color: #000;
+  font-size: 1rem;
+  padding: 0 0.5rem;
+}
+</style></head><body><div class="jesthtml-content"><header><h1 id="title">Test Report</h1></header><div id="metadata-container"><div id="timestamp">Started: 2025-05-15 16:50:07</div><div id="summary"><div id="suite-summary"><div class="summary-total">Suites (4)</div><div class="summary-passed ">1 passed</div><div class="summary-failed ">3 failed</div><div class="summary-pending  summary-empty">0 pending</div></div><div id="test-summary"><div class="summary-total">Tests (7)</div><div class="summary-passed ">2 passed</div><div class="summary-failed ">5 failed</div><div class="summary-pending  summary-empty">0 pending</div></div></div></div><div id="suite-1" class="suite-container"><input id="collapsible-0" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-0"><div class="suite-info"><div class="suite-path">D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\tests\frontend\snapshot.test.js</div><div class="suite-time">3.858s</div></div></label><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">Snapshot Tests</div><div class="test-title">should match snapshot for CityCard component</div><div class="test-status">passed</div><div class="test-duration">0.074s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Snapshot Tests</div><div class="test-title">should match snapshot for flipped CityCard</div><div class="test-status">passed</div><div class="test-duration">0.036s</div></div></div></div></div><div id="suite-2" class="suite-container"><input id="collapsible-1" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-1"><div class="suite-info"><div class="suite-path">D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\tests\backend\api.test.js</div><div class="suite-time">0s</div></div></label><div class="suite-tests"><div class="test-result failed"><div class="failureMessages suiteFailure"> <pre class="failureMsg">  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\chai\chai.js:4101
+    export {
+    ^^^^^^
+
+    SyntaxError: Unexpected token 'export'
+
+      1 | import kill from 'kill-port';
+    &gt; 2 | import chai from 'chai';
+        | ^
+      3 | import chaiHttp from 'chai-http';
+      4 | const port = process.env.PORT || 8000;
+      5 |
+
+      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.require (tests/backend/api.test.js:2:1)
+</pre></div></div></div></div><div id="suite-3" class="suite-container"><input id="collapsible-2" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-2"><div class="suite-info"><div class="suite-path">D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\tests\health.test.js</div><div class="suite-time">0s</div></div></label><div class="suite-tests"><div class="test-result failed"><div class="failureMessages suiteFailure"> <pre class="failureMsg">  ● Test suite failed to run
+
+    Cannot find module 'supertest' from 'tests/health.test.js'
+
+    &gt; 1 | import request from 'supertest';
+        | ^
+      2 | import { app } from '../index.js';
+      3 |
+      4 | describe('GET /health', () =&gt; {
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.require (tests/health.test.js:1:1)
+</pre></div></div></div></div><div id="suite-4" class="suite-container"><input id="collapsible-3" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-3"><div class="suite-info"><div class="suite-path">D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\tests\examples\WeatherCard.test.js</div><div class="suite-time warn">29.387s</div></div></label><div class="suite-tests"><div class="test-result failed"><div class="test-info"><div class="test-suitename">WeatherCard</div><div class="test-title">renders weather information correctly</div><div class="test-status">failed</div><div class="test-duration">5.099s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: Unable to find an element with the text: /20°C/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
     at waitForWrapper (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\@testing-library\dom\dist\wait-for.js:163:27)
     at _callee$ (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\tests\examples\WeatherCard.test.js:24:18)
     at s (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\@babel\runtime\helpers\regeneratorRuntime.js:75:16)
@@ -32,10 +332,7 @@
     at jestAdapter (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
     at runTestInternal (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\runTest.js:367:16)
     at runTest (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="WeatherCard" name="handles API errors gracefully" time="5.016">
-      <failure>Error: Unable to find an element with the text: /Error loading weather data/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+    at Object.worker (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\testWorker.js:106:12)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">WeatherCard</div><div class="test-title">handles API errors gracefully</div><div class="test-status">failed</div><div class="test-duration">5.016s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: Unable to find an element with the text: /Error loading weather data/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
     at waitForWrapper (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\@testing-library\dom\dist\wait-for.js:163:27)
     at _callee2$ (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\tests\examples\WeatherCard.test.js:39:18)
     at s (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\@babel\runtime\helpers\regeneratorRuntime.js:75:16)
@@ -58,10 +355,7 @@
     at jestAdapter (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
     at runTestInternal (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\runTest.js:367:16)
     at runTest (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="WeatherCard" name="updates weather data when refresh button is clicked" time="5.007">
-      <failure>Error: Unable to find an element with the text: /20°C/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+    at Object.worker (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\testWorker.js:106:12)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">WeatherCard</div><div class="test-title">updates weather data when refresh button is clicked</div><div class="test-status">failed</div><div class="test-duration">5.007s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: Unable to find an element with the text: /20°C/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
     at waitForWrapper (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\@testing-library\dom\dist\wait-for.js:163:27)
     at _callee3$ (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\tests\examples\WeatherCard.test.js:68:18)
     at s (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\@babel\runtime\helpers\regeneratorRuntime.js:75:16)
@@ -84,10 +378,7 @@
     at jestAdapter (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
     at runTestInternal (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\runTest.js:367:16)
     at runTest (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="WeatherCard" name="handles geolocation errors" time="5.009">
-      <failure>Error: Unable to find an element with the text: /Error getting location/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+    at Object.worker (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\testWorker.js:106:12)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">WeatherCard</div><div class="test-title">handles geolocation errors</div><div class="test-status">failed</div><div class="test-duration">5.009s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: Unable to find an element with the text: /Error getting location/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
     at waitForWrapper (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\@testing-library\dom\dist\wait-for.js:163:27)
     at _callee4$ (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\tests\examples\WeatherCard.test.js:100:18)
     at s (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\@babel\runtime\helpers\regeneratorRuntime.js:75:16)
@@ -110,10 +401,7 @@
     at jestAdapter (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
     at runTestInternal (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\runTest.js:367:16)
     at runTest (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="WeatherCard" name="handles offline state" time="5.014">
-      <failure>Error: Unable to find an element with the text: /You are offline/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+    at Object.worker (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\testWorker.js:106:12)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">WeatherCard</div><div class="test-title">handles offline state</div><div class="test-status">failed</div><div class="test-duration">5.014s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: Unable to find an element with the text: /You are offline/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
     at waitForWrapper (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\@testing-library\dom\dist\wait-for.js:163:27)
     at _callee5$ (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\tests\examples\WeatherCard.test.js:115:18)
     at s (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\@babel\runtime\helpers\regeneratorRuntime.js:75:16)
@@ -136,7 +424,4 @@
     at jestAdapter (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
     at runTestInternal (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\runTest.js:367:16)
     at runTest (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
-    </testcase>
-  </testsuite>
-</testsuites>
+    at Object.worker (D:\Sam\Dev Projects\Developer Academy Projects\Weather App Team Project\Weather-App-for-Developer-Academy-Project\node_modules\jest-runner\build\testWorker.js:106:12)</pre></div></div></div></div></div></body></html>

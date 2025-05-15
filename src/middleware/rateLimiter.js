@@ -62,80 +62,32 @@ process.on('SIGINT', () => {
   redis.quit();
 });
 
-const rateLimiter = async (ctx, next) => {
-  const ip = ctx.request.ip;
-  const now = Date.now();
-  const key = `ratelimit:${ip}`;
-  
-  try {
-    // Check Redis connection status
-    if (!isConnected) {
-      logger.warn('Redis not connected, allowing request');
-      await next();
-      return;
-    }
-    
-    // Get current count and expiry from Redis
-    const [count, ttl] = await Promise.all([
-      redis.get(key),
-      redis.ttl(key)
-    ]);
-    
-    const currentCount = count ? parseInt(count, 10) : 0;
-    const resetTime = now + (ttl > 0 ? ttl * 1000 : WINDOW_MS);
-    
-    // Check if rate limit is exceeded
-    if (currentCount >= MAX_REQUESTS) {
-      logger.warn(`Rate limit exceeded for IP: ${ip}`);
-      ctx.status = 429;
-      ctx.body = {
-        error: {
-          message: 'Too many requests, please try again later',
-          retryAfter: RETRY_AFTER,
-          requestId: ctx.state.requestId,
-          resetTime: new Date(resetTime).toISOString()
-        }
-      };
-      
-      // Set rate limit headers
-      ctx.set('X-RateLimit-Limit', MAX_REQUESTS);
-      ctx.set('X-RateLimit-Remaining', 0);
-      ctx.set('X-RateLimit-Reset', Math.ceil(resetTime / 1000));
-      ctx.set('Retry-After', RETRY_AFTER);
-      return;
-    }
-    
-    // Increment counter and set expiry if not exists
-    const multi = redis.multi();
-    multi.incr(key);
-    if (currentCount === 0) {
-      multi.expire(key, Math.ceil(WINDOW_MS / 1000));
-    }
-    await multi.exec();
-    
-    // Add rate limit headers
-    ctx.set('X-RateLimit-Limit', MAX_REQUESTS);
-    ctx.set('X-RateLimit-Remaining', MAX_REQUESTS - (currentCount + 1));
-    ctx.set('X-RateLimit-Reset', Math.ceil(resetTime / 1000));
-    
-    await next();
-  } catch (error) {
-    logger.error('Rate limiter error:', {
-      error,
-      ip,
-      path: ctx.path,
-      method: ctx.method,
-      redisStatus: {
-        connected: isConnected,
-        lastError: lastError ? {
-          code: lastError.code,
-          message: lastError.message
-        } : null
-      }
-    });
-    // If Redis fails, allow the request but log the error
-    await next();
-  }
-};
+const rateLimit = new Map();
 
-export default rateLimiter; 
+export default async (ctx, next) => {
+  const ip = ctx.ip;
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const maxRequests = 100; // max requests per window
+
+  if (!rateLimit.has(ip)) {
+    rateLimit.set(ip, {
+      count: 1,
+      resetTime: now + windowMs
+    });
+  } else {
+    const userLimit = rateLimit.get(ip);
+    if (now > userLimit.resetTime) {
+      userLimit.count = 1;
+      userLimit.resetTime = now + windowMs;
+    } else if (userLimit.count >= maxRequests) {
+      ctx.status = 429;
+      ctx.body = { error: 'Too many requests, please try again later' };
+      return;
+    } else {
+      userLimit.count++;
+    }
+  }
+
+  await next();
+}; 

@@ -1,3 +1,4 @@
+import React from 'react';
 import { render } from '@testing-library/react';
 import CityCard from '../../frontend/src/components/cityCard/CityCard';
 

@@ -2,12 +2,12 @@ import Koa from 'koa';
 import Router from 'koa-router';
 import fetch from 'node-fetch';
 import cors from 'kcors';
-import errorHandler from './src/middleware/errorHandler.js';
-import logger from './src/middleware/logger.js';
-import rateLimiter from './src/middleware/rateLimiter.js';
-import security from './src/middleware/security.js';
-import validator from './src/middleware/validator.js';
-import performanceMonitor from './src/middleware/performance.js';
+import errorHandler from '../middleware/errorHandler.js';
+import logger from '../middleware/logger.js';
+import rateLimiter from '../middleware/rateLimiter.js';
+import security from '../middleware/security.js';
+import validator from '../middleware/validator.js';
+import performanceMonitor from '../middleware/performance.js';
 
 if (!process.env.APPID) {
   logger.error('APPID environment variable is not set');
@@ -190,4 +190,4 @@ if (process.env.NODE_ENV !== 'test') {
   });
 }
 
-export { app };
+export { app }; 

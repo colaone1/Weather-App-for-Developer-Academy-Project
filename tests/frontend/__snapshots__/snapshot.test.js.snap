@@ -1,0 +1,285 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Snapshot Tests should match snapshot for CityCard component 1`] = `
+<div>
+  <div
+    class="card-container"
+  >
+    <div
+      class="flipped-container"
+    >
+      <div
+        class="card-front"
+      >
+        <h2
+          class="city-name"
+        >
+          London
+        </h2>
+        <div
+          class="weather-info"
+        >
+          <img
+            alt="clear sky"
+            class="weather-icon"
+            loading="lazy"
+            src="http://openweathermap.org/img/wn/01d@2x.png"
+          />
+          <div
+            class="temperature"
+          >
+            <span
+              class="temp-value"
+            >
+              20
+              °C
+            </span>
+            <span
+              class="feels-like"
+            >
+              Feels like: 
+              19
+              °C
+            </span>
+          </div>
+        </div>
+        <div
+          class="weather-description"
+        >
+          Clear sky
+        </div>
+      </div>
+      <div
+        class="card-back"
+      >
+        <div
+          class="info-item-back"
+        >
+          <span
+            class="info-label"
+          >
+            Pressure:
+          </span>
+          <span
+            class="info-value"
+          >
+            1013
+             hPa
+          </span>
+        </div>
+        <div
+          class="info-item-back"
+        >
+          <span
+            class="info-label"
+          >
+            Humidity:
+          </span>
+          <span
+            class="info-value"
+          >
+            65
+            %
+          </span>
+        </div>
+        <div
+          class="info-item-back"
+        >
+          <span
+            class="info-label"
+          >
+            Wind Speed:
+          </span>
+          <span
+            class="info-value"
+          >
+            5.2
+             m/s
+          </span>
+        </div>
+        <div
+          class="info-item-back"
+        >
+          <span
+            class="info-label"
+          >
+            Visibility:
+          </span>
+          <span
+            class="info-value"
+          >
+            10
+             km
+          </span>
+        </div>
+        <button
+          aria-label="Delete London weather card"
+          class="btn-delete"
+        >
+          <svg
+            color="white"
+            fill="currentColor"
+            height="24"
+            stroke="currentColor"
+            stroke-width="0"
+            style="color: white;"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+            <path
+              d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Snapshot Tests should match snapshot for flipped CityCard 1`] = `
+<div>
+  <div
+    class="card-container flipped"
+  >
+    <div
+      class="flipped-container"
+    >
+      <div
+        class="card-front"
+      >
+        <h2
+          class="city-name"
+        >
+          London
+        </h2>
+        <div
+          class="weather-info"
+        >
+          <img
+            alt="clear sky"
+            class="weather-icon"
+            loading="lazy"
+            src="http://openweathermap.org/img/wn/01d@2x.png"
+          />
+          <div
+            class="temperature"
+          >
+            <span
+              class="temp-value"
+            >
+              20
+              °C
+            </span>
+            <span
+              class="feels-like"
+            >
+              Feels like: 
+              19
+              °C
+            </span>
+          </div>
+        </div>
+        <div
+          class="weather-description"
+        >
+          Clear sky
+        </div>
+      </div>
+      <div
+        class="card-back"
+      >
+        <div
+          class="info-item-back"
+        >
+          <span
+            class="info-label"
+          >
+            Pressure:
+          </span>
+          <span
+            class="info-value"
+          >
+            1013
+             hPa
+          </span>
+        </div>
+        <div
+          class="info-item-back"
+        >
+          <span
+            class="info-label"
+          >
+            Humidity:
+          </span>
+          <span
+            class="info-value"
+          >
+            65
+            %
+          </span>
+        </div>
+        <div
+          class="info-item-back"
+        >
+          <span
+            class="info-label"
+          >
+            Wind Speed:
+          </span>
+          <span
+            class="info-value"
+          >
+            5.2
+             m/s
+          </span>
+        </div>
+        <div
+          class="info-item-back"
+        >
+          <span
+            class="info-label"
+          >
+            Visibility:
+          </span>
+          <span
+            class="info-value"
+          >
+            10
+             km
+          </span>
+        </div>
+        <button
+          aria-label="Delete London weather card"
+          class="btn-delete"
+        >
+          <svg
+            color="white"
+            fill="currentColor"
+            height="24"
+            stroke="currentColor"
+            stroke-width="0"
+            style="color: white;"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+            <path
+              d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;

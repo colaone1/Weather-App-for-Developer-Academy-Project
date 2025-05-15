@@ -1,3 +1,4 @@
+import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithProviders, mockApiResponse, mockGeolocation, cleanup } from '../utils/testUtils';
 import WeatherCard from '../../src/components/WeatherCard';

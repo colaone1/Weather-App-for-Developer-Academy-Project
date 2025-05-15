@@ -1,7 +1,9 @@
+import { TextEncoder, TextDecoder } from 'util';
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/react';
 import { mockIntersectionObserver, mockResizeObserver, mockMatchMedia } from '../utils/testUtils';
-import { TextEncoder, TextDecoder } from 'util';
 
 // Configure testing-library with stricter settings
 configure({
@@ -19,10 +21,6 @@ beforeAll(() => {
   mockIntersectionObserver();
   mockResizeObserver();
   mockMatchMedia();
-  
-  // Add TextEncoder/TextDecoder for Node environment
-  global.TextEncoder = TextEncoder;
-  global.TextDecoder = TextDecoder;
   
   // Suppress console errors during tests
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -120,17 +118,17 @@ window.IntersectionObserver = jest.fn().mockImplementation((callback) => ({
   disconnect: jest.fn(),
 }));
 
-// Mock window.performance with more detailed implementation
-window.performance = {
-  now: jest.fn(() => Date.now()),
-  mark: jest.fn(),
-  measure: jest.fn(),
-  clearMarks: jest.fn(),
-  clearMeasures: jest.fn(),
-  getEntriesByType: jest.fn(() => []),
-  getEntriesByName: jest.fn(() => []),
-  getEntries: jest.fn(() => []),
-};
+// Patch window.performance to ensure all required methods are always available
+if (!window.performance) window.performance = {};
+window.performance.now = jest.fn(() => Date.now());
+window.performance.mark = window.performance.mark || jest.fn();
+window.performance.measure = window.performance.measure || jest.fn();
+window.performance.clearMarks = window.performance.clearMarks || jest.fn();
+window.performance.clearMeasures = window.performance.clearMeasures || jest.fn();
+window.performance.getEntriesByType = window.performance.getEntriesByType || jest.fn(() => []);
+window.performance.getEntriesByName = window.performance.getEntriesByName || jest.fn(() => []);
+window.performance.getEntries = window.performance.getEntries || jest.fn(() => []);
+window.performance.toJSON = window.performance.toJSON || jest.fn(() => ({ navigation: {}, timing: {}, memory: {} }));
 
 // Mock window.navigator with more detailed implementation
 Object.defineProperty(window, 'navigator', {
@@ -207,4 +205,9 @@ expect.extend({
       };
     }
   },
-}); 
+});
+
+global.requestIdleCallback = jest.fn();
+global.cancelIdleCallback = jest.fn();
+global.requestAnimationFrame = jest.fn();
+global.cancelAnimationFrame = jest.fn(); 
