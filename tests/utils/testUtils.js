@@ -75,33 +75,25 @@ export const mockLocalStorage = () => {
   return localStorageMock;
 };
 
-// Mock fetch
-export const mockFetch = (response) => {
-  global.fetch = jest.fn(() =>
-    Promise.resolve({
-      json: () => Promise.resolve(response),
-      ok: true,
-    })
-  );
+// Mock fetch with error handling
+export const mockFetch = (response, options = {}) => {
+  const { error = false, status = 200, delay = 0 } = options;
+  
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      if (error) {
+        global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
+      } else {
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: status >= 200 && status < 300,
+          status,
+          json: () => Promise.resolve(response),
+        });
+      }
+      resolve();
+    }, delay);
+  });
 };
-
-// Mock geolocation
-export const mockGeolocation = () => {
-  const mockGeolocation = {
-    getCurrentPosition: jest.fn()
-      .mockImplementationOnce((success) => success({
-        coords: {
-          latitude: 60.1695,
-          longitude: 24.9355
-        }
-      }))
-  };
-  global.navigator.geolocation = mockGeolocation;
-  return mockGeolocation;
-};
-
-// Wait for a specific time
-export const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Mock console methods
 export const mockConsole = () => {
@@ -114,4 +106,38 @@ export const mockConsole = () => {
   };
   global.console = mockConsole;
   return { originalConsole, mockConsole };
+};
+
+// Wait utility
+export const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Mock geolocation
+export const mockGeolocation = (coords = { latitude: 51.5074, longitude: -0.1278 }) => {
+  const mockGeolocation = {
+    getCurrentPosition: jest.fn()
+      .mockImplementation((success) => success({ coords })),
+    watchPosition: jest.fn(),
+    clearWatch: jest.fn(),
+  };
+  Object.defineProperty(global.navigator, 'geolocation', {
+    value: mockGeolocation,
+    writable: true,
+  });
+  return mockGeolocation;
+};
+
+// Mock performance
+export const mockPerformance = () => {
+  const performance = {
+    now: jest.fn().mockReturnValue(0),
+    mark: jest.fn(),
+    measure: jest.fn(),
+    clearMarks: jest.fn(),
+    clearMeasures: jest.fn(),
+  };
+  Object.defineProperty(global, 'performance', {
+    value: performance,
+    writable: true,
+  });
+  return performance;
 }; 

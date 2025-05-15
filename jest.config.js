@@ -14,8 +14,11 @@ module.exports = {
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx}',
+    'frontend/src/**/*.{js,jsx}',
     '!src/index.js',
     '!src/serviceWorker.js',
+    '!**/node_modules/**',
+    '!**/vendor/**',
   ],
   coverageThreshold: {
     global: {
@@ -24,8 +27,34 @@ module.exports = {
       lines: 80,
       statements: 80,
     },
+    './src/middleware/': {
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+    './frontend/src/components/': {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
   },
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['text', 'lcov', 'html', 'json', 'json-summary'],
+  coverageDirectory: 'coverage',
   verbose: true,
   testTimeout: 10000,
+  testEnvironmentOptions: {
+    url: 'http://localhost:3000',
+  },
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.json',
+    },
+  },
+  moduleFileExtensions: ['js', 'jsx', 'json', 'node'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  transformIgnorePatterns: [
+    '/node_modules/(?!(@testing-library|@babel|@emotion)/)',
+  ],
 }; 
