@@ -7,8 +7,8 @@ module.exports = defineConfig({
     viewportHeight: 720,
     video: false,
     screenshotOnRunFailure: true,
-    setupNodeEvents(on, config) {
-      // implement node event listeners here
+    setupNodeEvents(_on, _config) {
+      // implement node event listeners here if needed
     },
   },
   component: {

@@ -21,7 +21,8 @@
   },
   "plugins": [
     "react",
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "cypress"
   ],
   "rules": {
     "react/react-in-jsx-scope": "off",
@@ -34,5 +35,18 @@
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "overrides": [
+    {
+      "files": ["cypress/**/*.js", "cypress/**/*.ts"],
+      "extends": ["plugin:cypress/recommended"],
+      "env": { "cypress/globals": true }
+    },
+    {
+      "files": ["*.config.js", "*.config.cjs", "*.config.ts", "webpack.config.js"],
+      "rules": {
+        "@typescript-eslint/no-require-imports": "off"
+      }
+    }
+  ]
 } 

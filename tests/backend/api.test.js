@@ -4,7 +4,6 @@ import chaiHttp from 'chai-http';
 const port = process.env.PORT || 8000;
 
 //! start server for testing
-import app from '../src/index.js';
 
 //Assertion Style
 chai.should();

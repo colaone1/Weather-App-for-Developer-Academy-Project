@@ -1,5 +1,4 @@
 import { TextEncoder, TextDecoder } from 'util';
-import { performance } from 'perf_hooks';
 
 // Mock fetch globally with enhanced error handling
 global.fetch = jest.fn().mockImplementation(() => 
@@ -14,16 +13,16 @@ global.fetch = jest.fn().mockImplementation(() =>
 );
 
 // Mock requestIdleCallback
-global.requestIdleCallback = jest.fn().mockImplementation(callback => {
-  setTimeout(() => callback({ didTimeout: false, timeRemaining: () => 15 }), 0);
+global.requestIdleCallback = jest.fn().mockImplementation(cb => {
+  setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 15 }), 0);
   return 1;
 });
 
 global.cancelIdleCallback = jest.fn();
 
 // Mock requestAnimationFrame
-global.requestAnimationFrame = jest.fn().mockImplementation(callback => {
-  setTimeout(callback, 0);
+global.requestAnimationFrame = jest.fn().mockImplementation(cb => {
+  setTimeout(cb, 0);
   return 1;
 });
 

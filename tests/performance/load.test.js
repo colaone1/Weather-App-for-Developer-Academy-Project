@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const { performance } = require('perf_hooks');
