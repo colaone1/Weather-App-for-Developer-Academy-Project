@@ -19,7 +19,9 @@
     "dev": "nodemon index.js",
     "lint": "eslint .",
     "build": "webpack --mode production",
-    "analyze": "webpack-bundle-analyzer"
+    "analyze": "webpack-bundle-analyzer",
+    "test:server": "NODE_ENV=test node server.js",
+    "test:all": "concurrently \"npm run test:server\" \"npm run test\" \"npm run test:e2e\""
   },
   "dependencies": {
     "axios": "^0.21.1",

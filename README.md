@@ -8,6 +8,7 @@ A robust Node.js backend for a weather application, built with Koa. Provides wea
 - Health check endpoint
 - Error handling and logging (Winston)
 - Rate limiting and security middleware
+- Comprehensive testing setup
 
 ## Getting Started
 
@@ -31,6 +32,58 @@ Create a `.env` file or set these variables:
 ```sh
 npm start
 ```
+
+## Testing
+
+### Running Tests
+```sh
+# Run all tests
+npm test
+
+# Run specific test types
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run E2E tests with UI
+npm run cypress:open
+```
+
+### Test Structure
+```
+tests/
+├── setup/
+│   └── setupTests.js      # Global test configuration
+├── utils/
+│   └── testUtils.js       # Common testing utilities
+├── factories/
+│   └── weatherFactory.js  # Test data factories
+└── frontend/
+    └── snapshot.test.js   # Snapshot tests
+```
+
+### Test Coverage
+The project maintains a minimum test coverage of 80% for:
+- Branches
+- Functions
+- Lines
+- Statements
+
+View coverage reports by running:
+```sh
+npm run test:coverage
+```
+
+### Automated Testing
+The project uses GitHub Actions for automated testing:
+- Runs on every push to master
+- Runs on pull requests
+- Executes linting, unit tests, and E2E tests
+- Uploads coverage reports to Codecov
 
 ## API Endpoints
 
