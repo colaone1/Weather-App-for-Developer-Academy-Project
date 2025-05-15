@@ -1,6 +1,6 @@
-'use client';
 import { weatherApiClient } from '../lib/api-client';
 import WeatherCard from '../components/WeatherCard';
+import CitySelector from '../components/CitySelector';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate every hour
@@ -37,21 +37,8 @@ export default async function Home({ searchParams }) {
           </p>
         </div>
       </div>
-      <select
-        defaultValue={cityIndex}
-        onChange={(e) => {
-          const url = new URL(window.location.href);
-          url.searchParams.set('city', e.target.value);
-          window.location.href = url.toString();
-        }}
-        className="mb-6 p-2 border rounded w-full max-w-xs mx-auto block bg-sky-300/60 backdrop-blur-sm shadow-md"
-      >
-        {weatherApiClient.cities.map((city, index) => (
-          <option key={index} value={index}>
-            {city.name}
-          </option>
-        ))}
-      </select>   
+      
+      <CitySelector cities={weatherApiClient.cities} currentCityIndex={cityIndex} />
 
       {!weatherData ? (
         <div className="text-center text-xl font-semibold">Loading...</div>

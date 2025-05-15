@@ -176,3 +176,10 @@ This app is best deployed on [Vercel](https://vercel.com/):
 3. Deploy and get your public URL.
 
 For more details, see the full documentation below.
+
+## 🧩 Code Structure & Testability
+
+- The backend logic (such as error handling and circuit breaker functionality) is modularized into separate files for clarity and maintainability.
+- Pure functions (e.g., circuit breaker utilities) are isolated and can be easily unit tested.
+- The project includes a Jest setup and example tests for these utilities.
+- This structure makes it easy to expand test coverage and maintain the codebase as the project grows.
