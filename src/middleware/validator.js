@@ -2,6 +2,7 @@ import logger from './logger.js';
 
 const MAX_BODY_SIZE = 1024 * 1024; // 1MB
 const MAX_QUERY_LENGTH = 1000; // 1000 characters
+const MAX_CITY_LENGTH = 100; // 100 characters
 
 // Input sanitization functions
 const sanitizeString = (str) => {
@@ -18,7 +19,7 @@ const sanitizeNumber = (num) => {
 // Validation functions
 const validateCity = (city) => {
   const sanitized = sanitizeString(city);
-  return /^[a-zA-Z\s\-']+$/.test(sanitized) && sanitized.length <= 100;
+  return /^[a-zA-Z\s\-']+$/.test(sanitized) && sanitized.length <= MAX_CITY_LENGTH;
 };
 
 const validateCoordinates = (lon, lat) => {
