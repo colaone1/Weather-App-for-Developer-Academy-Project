@@ -35,6 +35,16 @@ const RETRY_CONFIG = {
   backoffFactor: 2
 };
 
+// Circuit breaker configuration
+const CIRCUIT_BREAKER_CONFIG = {
+  failureThreshold: 5,
+  resetTimeout: 30000, // 30 seconds
+  halfOpenTimeout: 5000 // 5 seconds
+};
+
+// Circuit breaker state
+const circuitBreakers = new Map();
+
 const calculateRetryDelay = (attempt) => {
   const delay = Math.min(
     RETRY_CONFIG.initialDelay * Math.pow(RETRY_CONFIG.backoffFactor, attempt),
@@ -43,12 +53,89 @@ const calculateRetryDelay = (attempt) => {
   return delay;
 };
 
+const getCircuitBreaker = (service) => {
+  if (!circuitBreakers.has(service)) {
+    circuitBreakers.set(service, {
+      failures: 0,
+      lastFailureTime: null,
+      state: 'CLOSED'
+    });
+  }
+  return circuitBreakers.get(service);
+};
+
+const updateCircuitBreaker = (service, success) => {
+  const breaker = getCircuitBreaker(service);
+  const now = Date.now();
+
+  if (success) {
+    breaker.failures = 0;
+    breaker.state = 'CLOSED';
+  } else {
+    breaker.failures++;
+    breaker.lastFailureTime = now;
+
+    if (breaker.failures >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
+      breaker.state = 'OPEN';
+    }
+  }
+};
+
+const isCircuitBreakerOpen = (service) => {
+  const breaker = getCircuitBreaker(service);
+  const now = Date.now();
+
+  if (breaker.state === 'OPEN') {
+    if (now - breaker.lastFailureTime >= CIRCUIT_BREAKER_CONFIG.resetTimeout) {
+      breaker.state = 'HALF-OPEN';
+      return false;
+    }
+    return true;
+  }
+
+  if (breaker.state === 'HALF-OPEN') {
+    if (now - breaker.lastFailureTime >= CIRCUIT_BREAKER_CONFIG.halfOpenTimeout) {
+      breaker.state = 'CLOSED';
+      return false;
+    }
+    return true;
+  }
+
+  return false;
+};
+
 const errorHandler = async (ctx, next) => {
   let attempt = 0;
+  const service = ctx.path.split('/')[2] || 'default'; // Extract service name from path
+  
+  // Check circuit breaker
+  if (isCircuitBreakerOpen(service)) {
+    ctx.status = 503;
+    ctx.body = {
+      error: {
+        message: 'Service temporarily unavailable',
+        status: 503,
+        category: ERROR_CATEGORIES.EXTERNAL_SERVICE,
+        requestId: ctx.state.requestId
+      }
+    };
+    return;
+  }
   
   while (attempt <= RETRY_CONFIG.maxRetries) {
     try {
-      await next();
+      // Set request timeout
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('Request timeout'));
+        }, 30000); // 30 second timeout
+      });
+
+      // Race between the request and timeout
+      await Promise.race([next(), timeoutPromise]);
+      
+      // Update circuit breaker on success
+      updateCircuitBreaker(service, true);
       return;
     } catch (err) {
       attempt++;
@@ -74,6 +161,11 @@ const errorHandler = async (ctx, next) => {
         category === ERROR_CATEGORIES.NETWORK ||
         category === ERROR_CATEGORIES.TIMEOUT
       );
+      
+      // Update circuit breaker on failure
+      if (isRetryable) {
+        updateCircuitBreaker(service, false);
+      }
       
       // Enhanced error response
       const errorResponse = {

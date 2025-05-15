@@ -5,9 +5,20 @@ import { v4 as uuidv4 } from 'uuid';
 const SLOW_REQUEST_THRESHOLD = 1000; // 1 second
 const HIGH_MEMORY_THRESHOLD = 50 * 1024 * 1024; // 50MB
 const HIGH_CPU_THRESHOLD = 70; // 70%
+const METRICS_CLEANUP_INTERVAL = 3600000; // 1 hour
 
 // Performance metrics storage
 const metrics = new Map();
+
+// Periodic cleanup of old metrics
+setInterval(() => {
+  const now = Date.now();
+  for (const [traceId, metric] of metrics.entries()) {
+    if (now - metric.startTime > METRICS_CLEANUP_INTERVAL) {
+      metrics.delete(traceId);
+    }
+  }
+}, METRICS_CLEANUP_INTERVAL);
 
 const performanceMonitor = async (ctx, next) => {
   const traceId = uuidv4();
@@ -41,7 +52,6 @@ const performanceMonitor = async (ctx, next) => {
       `request-end-${traceId}`
     );
     
-  } finally {
     const end = performance.now();
     const endMemory = process.memoryUsage();
     const endCpu = process.cpuUsage(startCpu);
@@ -123,6 +133,13 @@ const performanceMonitor = async (ctx, next) => {
     
     // Remove metrics from storage
     metrics.delete(traceId);
+  } catch (error) {
+    logger.error('Performance monitoring error:', {
+      error,
+      traceId,
+      requestId: ctx.state.requestId
+    });
+    await next();
   }
 };
 

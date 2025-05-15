@@ -1,6 +1,60 @@
 import { randomBytes } from 'crypto';
+import logger from './logger.js';
+
+const MAX_REQUEST_SIZE = 1024 * 1024; // 1MB
+const AUTH_FAILURE_LIMIT = 5;
+const AUTH_FAILURE_WINDOW = 15 * 60 * 1000; // 15 minutes
+
+// Track authentication failures
+const authFailures = new Map();
+
+// Clean up old auth failures periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, data] of authFailures.entries()) {
+    if (now - data.timestamp > AUTH_FAILURE_WINDOW) {
+      authFailures.delete(ip);
+    }
+  }
+}, AUTH_FAILURE_WINDOW);
 
 const security = async (ctx, next) => {
+  const ip = ctx.request.ip;
+  
+  // Check request size
+  if (ctx.request.length > MAX_REQUEST_SIZE) {
+    ctx.status = 413;
+    ctx.body = {
+      error: {
+        message: 'Request entity too large',
+        status: 413,
+        category: 'VALIDATION_ERROR'
+      }
+    };
+    return;
+  }
+  
+  // Check authentication failures
+  const authData = authFailures.get(ip) || { count: 0, timestamp: Date.now() };
+  if (authData.count >= AUTH_FAILURE_LIMIT) {
+    const timeLeft = AUTH_FAILURE_WINDOW - (Date.now() - authData.timestamp);
+    if (timeLeft > 0) {
+      ctx.status = 429;
+      ctx.body = {
+        error: {
+          message: 'Too many authentication failures',
+          status: 429,
+          category: 'AUTHENTICATION_ERROR',
+          retryAfter: Math.ceil(timeLeft / 1000)
+        }
+      };
+      ctx.set('Retry-After', Math.ceil(timeLeft / 1000));
+      return;
+    } else {
+      authFailures.delete(ip);
+    }
+  }
+
   // Generate CSRF token if not exists
   if (!ctx.cookies.get('csrf-token')) {
     const csrfToken = randomBytes(32).toString('hex');
@@ -60,25 +114,40 @@ const security = async (ctx, next) => {
     'sync-xhr=(self)'
   ].join(', '));
 
-  // Verify CSRF token for non-GET requests
-  if (ctx.method !== 'GET') {
-    const csrfToken = ctx.cookies.get('csrf-token');
-    const headerToken = ctx.get('X-CSRF-Token');
-    
-    if (!csrfToken || !headerToken || csrfToken !== headerToken) {
-      ctx.status = 403;
-      ctx.body = {
-        error: {
-          message: 'Invalid CSRF token',
-          status: 403,
-          category: 'AUTHORIZATION_ERROR'
-        }
-      };
-      return;
+  try {
+    // Verify CSRF token for non-GET requests
+    if (ctx.method !== 'GET') {
+      const csrfToken = ctx.cookies.get('csrf-token');
+      const headerToken = ctx.get('X-CSRF-Token');
+      
+      if (!csrfToken || !headerToken || csrfToken !== headerToken) {
+        // Increment auth failure counter
+        authData.count++;
+        authData.timestamp = Date.now();
+        authFailures.set(ip, authData);
+        
+        ctx.status = 403;
+        ctx.body = {
+          error: {
+            message: 'Invalid CSRF token',
+            status: 403,
+            category: 'AUTHORIZATION_ERROR'
+          }
+        };
+        return;
+      }
     }
+    
+    await next();
+  } catch (error) {
+    logger.error('Security middleware error:', {
+      error,
+      ip,
+      path: ctx.path,
+      method: ctx.method
+    });
+    throw error;
   }
-  
-  await next();
 };
 
 export default security; 
