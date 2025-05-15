@@ -1,0 +1,134 @@
+.card-container {
+  perspective: 1000px;
+  width: 300px;
+  height: 400px;
+  margin: 20px;
+  cursor: pointer;
+}
+
+.flipped-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.card-container.flipped .flipped-container {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
+}
+
+.card-back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.city-name {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.weather-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.weather-icon {
+  width: 100px;
+  height: 100px;
+}
+
+.temperature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.temp-value {
+  font-size: 36px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.feels-like {
+  font-size: 14px;
+  color: #7f8c8d;
+}
+
+.weather-description {
+  text-align: center;
+  font-size: 18px;
+  color: #34495e;
+  text-transform: capitalize;
+}
+
+.info-item-back {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.info-label {
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.info-value {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.btn-delete {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e74c3c;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-delete:hover {
+  background-color: #c0392b;
+}
+
+@media (max-width: 768px) {
+  .card-container {
+    width: 280px;
+    height: 380px;
+  }
+
+  .city-name {
+    font-size: 20px;
+  }
+
+  .temp-value {
+    font-size: 30px;
+  }
+
+  .weather-icon {
+    width: 80px;
+    height: 80px;
+  }
+}

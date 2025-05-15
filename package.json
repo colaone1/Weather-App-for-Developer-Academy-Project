@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "weather-app",
   "version": "0.1.0",
   "private": true,
@@ -17,5 +18,11 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "tailwindcss": "^4"
+=======
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@types/jest": "^29.5.14",
+    "@types/testing-library__jest-dom": "^5.14.9"
+>>>>>>> master
   }
 }
